@@ -15,6 +15,7 @@ import { PatientDashboard } from '@/pages/patient/Dashboard';
 import { PatientTimeline } from '@/pages/patient/Timeline';
 import { PatientRecords } from '@/pages/patient/Records';
 import { PatientConsents } from '@/pages/patient/Consents';
+import { PatientActivity } from '@/pages/patient/Activity';
 
 import { HospitalDashboard } from '@/pages/hospital/Dashboard';
 import { AddRecord } from '@/pages/hospital/AddRecord';
@@ -38,6 +39,7 @@ export const AppRoutes = () => {
           <Route path="timeline" element={<PatientTimeline />} />
           <Route path="records" element={<PatientRecords />} />
           <Route path="consents" element={<PatientConsents />} />
+          <Route path="activity" element={<PatientActivity />} />
           <Route path="emergency" element={<div className="p-4">Emergency Profile (Step 10)</div>} />
         </Route>
 

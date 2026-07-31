@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Activity, FileText, FileBadge, ShieldAlert, User, LogOut } from 'lucide-react';
+import { LayoutDashboard, Activity, FileText, FileBadge, ShieldAlert, User, LogOut, History } from 'lucide-react'; // <-- Added History icon
 
 export const PatientLayout = () => {
   const location = useLocation();
@@ -9,6 +9,7 @@ export const PatientLayout = () => {
     { name: 'Timeline', href: '/patient/timeline', icon: Activity },
     { name: 'My Records', href: '/patient/records', icon: FileText },
     { name: 'Consents', href: '/patient/consents', icon: FileBadge },
+    { name: 'Activity Log', href: '/patient/activity', icon: History }, // <-- Added Activity Log
     { name: 'Emergency Profile', href: '/patient/emergency', icon: ShieldAlert },
   ];
 
