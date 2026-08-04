@@ -1,3 +1,5 @@
+import { HowItWorks } from '@/pages/public/HowItWorks';
+
 import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { PublicLayout } from '@/layouts/PublicLayout';
 import { PatientLayout } from '@/layouts/PatientLayout';
@@ -28,7 +30,7 @@ export const AppRoutes = () => {
         {/* Public Routes */}
         <Route element={<PublicLayout />}>
           <Route path="/" element={<LandingPage />} />
-          <Route path="/how-it-works" element={<div className="p-8 text-center">How it works coming soon...</div>} />
+          <Route path="/how-it-works" element={<HowItWorks />} />
         </Route>
 
         {/* Auth Route */}

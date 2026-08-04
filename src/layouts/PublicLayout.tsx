@@ -5,19 +5,32 @@ import { Activity } from 'lucide-react';
 export const PublicLayout = () => {
   return (
     <div className="min-h-screen flex flex-col">
-      {/* Navbar */}
-      <header className="border-b bg-white">
-        <div className="container mx-auto px-4 h-16 flex items-center justify-between">
-          <Link to="/" className="flex items-center gap-2 text-primary font-bold text-xl">
-            <Activity className="h-6 w-6" />
-            <span>UPHRP</span>
+      {/* Sticky Navbar - Scroll karne par upar rahega */}
+      <header className="border-b bg-white/80 backdrop-blur-md sticky top-0 z-50 transition-all">
+        <div className="container mx-auto px-4 h-16 flex items-center justify-between max-w-7xl">
+          {/* Logo & Brand Name */}
+          <Link to="/" className="flex items-center gap-2 text-primary font-bold text-2xl tracking-tight">
+            <Activity className="h-7 w-7" />
+            <span>UPHAR</span>
           </Link>
-          <nav className="flex items-center gap-4">
-            <Link to="/how-it-works" className="text-sm font-medium text-slate-600 hover:text-primary">How it works</Link>
-            <Link to="/login">
-              <Button variant="outline">Login</Button>
-            </Link>
+          
+          {/* Main Navigation Links (App Style) */}
+          <nav className="hidden md:flex items-center gap-8">
+            <Link to="/" className="text-sm font-semibold text-slate-700 hover:text-primary transition-colors">Home</Link>
+            <a href="#features" className="text-sm font-semibold text-slate-600 hover:text-primary transition-colors">Features</a>
+            <a href="#preview" className="text-sm font-semibold text-slate-600 hover:text-primary transition-colors">App Preview</a>
+            <Link to="/how-it-works" className="text-sm font-semibold text-slate-600 hover:text-primary transition-colors">How it works</Link>
           </nav>
+
+          {/* Action Buttons */}
+          <div className="flex items-center gap-4">
+            <Link to="/login" className="hidden md:block">
+              <span className="text-sm font-medium text-slate-600 hover:text-primary transition-colors">Sign In</span>
+            </Link>
+            <Link to="/login">
+              <Button className="rounded-full px-6 shadow-md hover:shadow-lg transition-all">Get Started</Button>
+            </Link>
+          </div>
         </div>
       </header>
 
