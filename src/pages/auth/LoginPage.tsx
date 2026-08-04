@@ -1,31 +1,122 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Activity } from 'lucide-react';
+import { Activity, UserPlus, LogIn, Stethoscope, Building, User } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
+import { supabase } from '@/supabaseClient';
 
 type Role = 'patient' | 'doctor' | 'hospital';
 
 export const LoginPage = () => {
   const [role, setRole] = useState<Role>('patient');
+  
+  // Common Fields
+  const [name, setName] = useState('');
+  const [phone, setPhone] = useState(''); 
+  const [email, setEmail] = useState('');
+  const [password, setPassword] = useState('');
+  
+  // Patient Specific
+  const [dob, setDob] = useState('');
+  const [gender, setGender] = useState('');
+  
+  // Doctor & Hospital Specific
+  const [license, setLicense] = useState(''); // Doctor License or Hospital Reg No
+  const [specialization, setSpecialization] = useState(''); // Doctor only
+  const [address, setAddress] = useState(''); // Hospital only
+
+  const [isSignUp, setIsSignUp] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState('');
+  
   const navigate = useNavigate();
 
-  const handleLogin = (e: React.FormEvent) => {
+  // Role change hone par form clear kar do
+  useEffect(() => {
+    setName(''); setPhone(''); setDob(''); setGender(''); 
+    setLicense(''); setSpecialization(''); setAddress('');
+  }, [role, isSignUp]);
+
+  const handleAuth = async (e: React.FormEvent) => {
     e.preventDefault();
-  
-    navigate(`/${role}/dashboard`);
+    setLoading(true);
+    setMessage('');
+
+    if (isSignUp) {
+      // 1. Supabase Auth Signup
+      const { data, error } = await supabase.auth.signUp({
+        email: email,
+        password: password,
+        options: {
+          data: {
+            full_name: name,
+            role: role
+          }
+        }
+      });
+
+      if (error) {
+        setMessage('Error: ' + error.message);
+      } else {
+        // 2. FastAPI Database Request
+        try {
+          // Jo role hai, uske hisaab se payload banayenge
+          const payload = {
+            name: name,
+            email: email,
+            role: role,
+            phone: phone,
+            dob: role === 'patient' ? dob : null,
+            gender: role === 'patient' ? gender : null,
+            license_number: role === 'doctor' || role === 'hospital' ? license : null,
+            specialization: role === 'doctor' ? specialization : null,
+            address: role === 'hospital' ? address : null
+          };
+
+          await fetch('http://127.0.0.1:8000/users/', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify(payload)
+          });
+          
+          setMessage('Account created successfully! You can now log in.');
+          setIsSignUp(false);
+        } catch (err) {
+          console.error("FastAPI Sync Error:", err);
+          setMessage('Account created, but failed to sync profile to Database.');
+        }
+      }
+    } else {
+      // LOG IN LOGIC
+      const { data, error } = await supabase.auth.signInWithPassword({
+        email: email,
+        password: password,
+      });
+
+      if (error) {
+        setMessage('Error: ' + error.message);
+      } else {
+        setMessage('Logged in successfully!');
+        navigate(`/${role}/dashboard`);
+      }
+    }
+    setLoading(false);
   };
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-      <div className="w-full max-w-md bg-white rounded-xl shadow-sm border p-8 space-y-6">
+      <div className="w-full max-w-lg bg-white rounded-xl shadow-sm border p-8 space-y-6 transition-all duration-300">
         <div className="text-center space-y-2">
           <Link to="/" className="inline-flex items-center gap-2 text-primary font-bold text-2xl mb-2">
             <Activity className="h-8 w-8" />
             <span>UPHRP</span>
           </Link>
-          <h1 className="text-2xl font-bold text-slate-900">Welcome back</h1>
-          <p className="text-sm text-slate-500">Sign in to your account</p>
+          <h1 className="text-2xl font-bold text-slate-900 flex items-center justify-center gap-2">
+            {isSignUp ? <><UserPlus className="w-6 h-6 text-primary"/> Create Account</> : <><LogIn className="w-6 h-6 text-primary"/> Welcome Back</>}
+          </h1>
+          <p className="text-sm text-slate-500">
+            {isSignUp ? 'Join UPHRP to manage medical records securely' : 'Sign in to access your dashboard'}
+          </p>
         </div>
 
         {/* Role Selector */}
@@ -35,29 +126,155 @@ export const LoginPage = () => {
               key={r}
               type="button"
               onClick={() => setRole(r)}
-              className={`flex-1 text-sm font-medium py-2 rounded-md capitalize transition-colors ${
+              className={`flex-1 flex items-center justify-center gap-2 text-sm font-medium py-2 rounded-md capitalize transition-colors ${
                 role === r ? 'bg-white shadow-sm text-slate-900' : 'text-slate-500 hover:text-slate-900'
               }`}
             >
+              {r === 'patient' && <User className="w-4 h-4" />}
+              {r === 'doctor' && <Stethoscope className="w-4 h-4" />}
+              {r === 'hospital' && <Building className="w-4 h-4" />}
               {r}
             </button>
           ))}
         </div>
 
-        <form onSubmit={handleLogin} className="space-y-4">
+        <form onSubmit={handleAuth} className="space-y-4">
+          
+          {/* ================= DYNAMIC SIGN UP FIELDS ================= */}
+          {isSignUp && (
+            <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+              
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">
+                    {role === 'hospital' ? 'Hospital Name' : 'Full Name'}
+                  </label>
+                  <Input 
+                    type="text" 
+                    placeholder={role === 'doctor' ? "e.g. Dr. Sarah Smith" : (role === 'hospital' ? "e.g. City Hospital" : "e.g. Golam Zaid")}
+                    required={isSignUp}
+                    value={name}
+                    onChange={(e) => setName(e.target.value)}
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <label className="text-sm font-medium text-slate-700">Contact Number</label>
+                  <Input 
+                    type="tel" 
+                    placeholder="+91 9876543210" 
+                    required={isSignUp}
+                    value={phone}
+                    onChange={(e) => setPhone(e.target.value)}
+                  />
+                </div>
+              </div>
+
+              {/* PATIENT ONLY FIELDS */}
+              {role === 'patient' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-700">Date of Birth</label>
+                    <Input type="date" required={isSignUp} value={dob} onChange={(e) => setDob(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-700">Gender</label>
+                    <select className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" required={isSignUp} value={gender} onChange={(e) => setGender(e.target.value)}>
+                      <option value="" disabled>Select Gender</option>
+                      <option value="Male">Male</option>
+                      <option value="Female">Female</option>
+                      <option value="Other">Other</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {/* DOCTOR ONLY FIELDS */}
+              {role === 'doctor' && (
+                <div className="grid grid-cols-2 gap-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-700">Medical License No.</label>
+                    <Input type="text" placeholder="e.g. MED-908234" required={isSignUp} value={license} onChange={(e) => setLicense(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-700">Specialization</label>
+                    <select className="flex h-10 w-full rounded-md border border-slate-300 bg-white px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" required={isSignUp} value={specialization} onChange={(e) => setSpecialization(e.target.value)}>
+                      <option value="" disabled>Select Specialization</option>
+                      <option value="General Physician">General Physician</option>
+                      <option value="Cardiologist">Cardiologist</option>
+                      <option value="Pediatrician">Pediatrician</option>
+                      <option value="Neurologist">Neurologist</option>
+                    </select>
+                  </div>
+                </div>
+              )}
+
+              {/* HOSPITAL ONLY FIELDS */}
+              {role === 'hospital' && (
+                <div className="space-y-4">
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-700">Registration Number</label>
+                    <Input type="text" placeholder="e.g. REG-2023-WB" required={isSignUp} value={license} onChange={(e) => setLicense(e.target.value)} />
+                  </div>
+                  <div className="space-y-2">
+                    <label className="text-sm font-medium text-slate-700">Complete Address</label>
+                    <Input type="text" placeholder="123 Health Ave, City" required={isSignUp} value={address} onChange={(e) => setAddress(e.target.value)} />
+                  </div>
+                </div>
+              )}
+
+            </div>
+          )}
+          {/* ======================================================== */}
+
           <div className="space-y-2">
-            <label className="text-sm font-medium text-slate-700">Email address</label>
-            <Input type="email" placeholder={`demo@${role}.com`} required defaultValue={`demo@${role}.com`} />
+            <label className="text-sm font-medium text-slate-700">
+              {role === 'hospital' ? 'Admin Email address' : 'Email address'}
+            </label>
+            <Input 
+              type="email" 
+              placeholder={`demo@${role}.com`} 
+              required 
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+            />
           </div>
+          
           <div className="space-y-2">
             <div className="flex justify-between items-center">
               <label className="text-sm font-medium text-slate-700">Password</label>
-              <a href="#" className="text-xs text-primary hover:underline">Forgot password?</a>
+              {!isSignUp && <a href="#" className="text-xs text-primary hover:underline">Forgot password?</a>}
             </div>
-            <Input type="password" placeholder="••••••••" required defaultValue="password123" />
+            <Input 
+              type="password" 
+              placeholder={isSignUp ? "Create a strong password (min 6 chars)" : "Enter your password"} 
+              required 
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+            />
           </div>
-          <Button type="submit" className="w-full h-11 text-base">Sign In as {role.charAt(0).toUpperCase() + role.slice(1)}</Button>
+          
+          {message && (
+            <div className={`text-sm p-3 rounded-lg border ${message.includes('Error') ? 'bg-red-50 text-red-600 border-red-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
+              {message}
+            </div>
+          )}
+
+          <Button type="submit" className="w-full h-11 text-base font-semibold" disabled={loading}>
+            {loading ? 'Processing...' : (isSignUp ? `Register as ${role.charAt(0).toUpperCase() + role.slice(1)}` : `Sign In`)}
+          </Button>
         </form>
+
+        <div className="text-center text-sm text-slate-500 pt-2 border-t">
+          {isSignUp ? "Already have an account? " : "Don't have an account? "}
+          <button 
+            type="button" 
+            onClick={() => { setIsSignUp(!isSignUp); setMessage(''); setPassword(''); }} 
+            className="text-primary hover:underline font-semibold"
+          >
+            {isSignUp ? 'Log in here' : 'Sign up here'}
+          </button>
+        </div>
       </div>
     </div>
   );
