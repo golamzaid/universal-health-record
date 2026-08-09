@@ -3,7 +3,6 @@ from sqlalchemy.orm import relationship
 import datetime
 from .database import Base
 
-# 1. Users Table 
 class User(Base):
     __tablename__ = "users"
 
@@ -12,19 +11,26 @@ class User(Base):
     name = Column(String)
     role = Column(String)
     
-    # --- NAYE FIELDS YAHAN ADD KIYE HAIN ---
     phone = Column(String, nullable=True)
     dob = Column(String, nullable=True)
     gender = Column(String, nullable=True)
-    
     license_number = Column(String, nullable=True)
     specialization = Column(String, nullable=True)
     address = Column(String, nullable=True)
-    # ---------------------------------------
+
+    # === NAYE FIELDS YAHAN HAIN ===
+    uphar_id = Column(String, unique=True, index=True, nullable=True) # Unique ID
+    profile_photo = Column(String, nullable=True)
+    father_name = Column(String, nullable=True)
+    aadhaar_number = Column(String, nullable=True) # Securely stored
+    abha_number = Column(String, nullable=True)    # Ayushman Bharat ID
+    insurance_provider = Column(String, nullable=True)
+    insurance_policy = Column(String, nullable=True)
+    # ==============================
 
     records = relationship("MedicalRecord", back_populates="patient")
 
-# 2. Medical Records Table (Omitted for brevity - keep it as it is)
+# MedicalRecord class waise hi rahegi...
 class MedicalRecord(Base):
     __tablename__ = "medical_records"
     id = Column(Integer, primary_key=True, index=True)

@@ -1,6 +1,6 @@
 import { Button } from '@/components/ui/Button';
 import { Link } from 'react-router-dom';
-import { ShieldCheck, Activity, Share2, ArrowRight } from 'lucide-react';
+import { ShieldCheck, Activity, Share2, ArrowRight } from 'lucide-react'; // Social icons hata diye hain
 
 export const LandingPage = () => {
   const features = [
@@ -133,7 +133,7 @@ export const LandingPage = () => {
       </section>
 
       {/* 3. FEATURES SECTION */}
-      <section id="features" className="px-4 py-24 sm:px-6 lg:px-8 bg-slate-50 border-t">
+      <section id="features" className="px-4 py-24 sm:px-6 lg:px-8 bg-slate-50 border-t border-b">
         <div className="max-w-7xl mx-auto">
           <div className="text-center mb-16">
             <h2 className="text-3xl font-bold text-slate-900">Why choose UPHAR?</h2>
@@ -153,6 +153,63 @@ export const LandingPage = () => {
           </div>
         </div>
       </section>
+
+      {/* 4. FOOTER SECTION */}
+      <footer className="bg-slate-900 text-slate-300 py-16 px-4 sm:px-6 lg:px-8">
+        <div className="max-w-7xl mx-auto grid grid-cols-1 md:grid-cols-4 gap-12">
+          
+          {/* Brand Column */}
+          <div className="space-y-4 md:col-span-1">
+            <div className="flex items-center gap-2 text-white font-bold text-2xl tracking-tight">
+              <Activity className="h-7 w-7 text-primary" />
+              <span>UPHAR</span>
+            </div>
+            <p className="text-sm text-slate-400 leading-relaxed">
+              Universal Patient Health Access & Record. Secure, portable, and patient-centric medical history management platform.
+            </p>
+          </div>
+
+          {/* Links Columns */}
+          <div>
+            <h4 className="text-white font-semibold mb-6">Product</h4>
+            <ul className="space-y-3 text-sm">
+              <li><a href="#features" className="hover:text-primary transition-colors">Features</a></li>
+              <li><a href="#preview" className="hover:text-primary transition-colors">App Preview</a></li>
+              <li><Link to="/how-it-works" className="hover:text-primary transition-colors">How it works</Link></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-white font-semibold mb-6">Company</h4>
+            <ul className="space-y-3 text-sm">
+              <li><a href="#" className="hover:text-primary transition-colors">About Us</a></li>
+              <li><a href="#" className="hover:text-primary transition-colors">Contact Support</a></li>
+              <li><a href="#" className="hover:text-primary transition-colors">Partner Clinics</a></li>
+            </ul>
+          </div>
+
+          <div>
+            <h4 className="text-white font-semibold mb-6">Legal</h4>
+            <ul className="space-y-3 text-sm">
+              <li><a href="#" className="hover:text-primary transition-colors">Privacy Policy</a></li>
+              <li><a href="#" className="hover:text-primary transition-colors">Terms of Service</a></li>
+              <li><a href="#" className="hover:text-primary transition-colors">HIPAA Compliance</a></li>
+            </ul>
+          </div>
+
+        </div>
+
+        {/* Copyright & Social Row */}
+        <div className="max-w-7xl mx-auto mt-16 pt-8 border-t border-slate-800 flex flex-col md:flex-row items-center justify-between gap-6">
+          <p className="text-sm text-slate-500">© 2026 UPHAR Inc. All rights reserved.</p>
+          <div className="flex items-center gap-5 text-sm font-medium">
+            {/* Icons ki jagah text links laga diye hain */}
+            <a href="#" className="text-slate-400 hover:text-white transition-colors">Twitter</a>
+            <a href="#" className="text-slate-400 hover:text-white transition-colors">LinkedIn</a>
+            <a href="#" className="text-slate-400 hover:text-white transition-colors">GitHub</a>
+          </div>
+        </div>
+      </footer>
 
     </div>
   );

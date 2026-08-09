@@ -2,39 +2,51 @@ from pydantic import BaseModel
 from datetime import datetime
 from typing import Optional
 
-# --- User Schemas ---
 class UserCreate(BaseModel):
     name: str
     email: str
     role: str = "patient"
-    # --- NAYE FIELDS API REQUEST KE LIYE ---
     phone: Optional[str] = None
     dob: Optional[str] = None
     gender: Optional[str] = None
     license_number: Optional[str] = None
     specialization: Optional[str] = None
     address: Optional[str] = None
-    # ---------------------------------------
+
+# Settings Page se update karne ke liye Naya Schema
+class UserUpdate(BaseModel):
+    profile_photo: Optional[str] = None
+    father_name: Optional[str] = None
+    aadhaar_number: Optional[str] = None
+    abha_number: Optional[str] = None
+    insurance_provider: Optional[str] = None
+    insurance_policy: Optional[str] = None
 
 class UserResponse(BaseModel):
     id: int
     name: str
     email: str
     role: str
-    # --- NAYE FIELDS API RESPONSE KE LIYE ---
     phone: Optional[str] = None
     dob: Optional[str] = None
     gender: Optional[str] = None
-    
     license_number: Optional[str] = None
     specialization: Optional[str] = None
     address: Optional[str] = None
-    # ----------------------------------------
+    
+    # Naye Fields Response mein bhi bhejo
+    uphar_id: Optional[str] = None
+    profile_photo: Optional[str] = None
+    father_name: Optional[str] = None
+    aadhaar_number: Optional[str] = None
+    abha_number: Optional[str] = None
+    insurance_provider: Optional[str] = None
+    insurance_policy: Optional[str] = None
 
     class Config:
         from_attributes = True
 
-# --- Medical Record Schemas (Keep as it is) ---
+# RecordCreate aur RecordResponse same rahenge...
 class RecordCreate(BaseModel):
     patient_id: int
     title: str
@@ -48,6 +60,5 @@ class RecordResponse(BaseModel):
     provider_name: str
     category: str
     date: datetime
-
     class Config:
         from_attributes = True

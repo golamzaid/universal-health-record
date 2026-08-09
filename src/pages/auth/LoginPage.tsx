@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
-import { Activity, UserPlus, LogIn, Stethoscope, Building, User } from 'lucide-react';
+import { Activity, UserPlus, LogIn, Stethoscope, Building, User, ArrowLeft } from 'lucide-react';
 import { Link, useNavigate } from 'react-router-dom';
 import { supabase } from '@/supabaseClient';
 
@@ -21,9 +21,9 @@ export const LoginPage = () => {
   const [gender, setGender] = useState('');
   
   // Doctor & Hospital Specific
-  const [license, setLicense] = useState(''); // Doctor License or Hospital Reg No
-  const [specialization, setSpecialization] = useState(''); // Doctor only
-  const [address, setAddress] = useState(''); // Hospital only
+  const [license, setLicense] = useState(''); 
+  const [specialization, setSpecialization] = useState(''); 
+  const [address, setAddress] = useState(''); 
 
   const [isSignUp, setIsSignUp] = useState(false);
   const [loading, setLoading] = useState(false);
@@ -31,7 +31,6 @@ export const LoginPage = () => {
   
   const navigate = useNavigate();
 
-  // Role change hone par form clear kar do
   useEffect(() => {
     setName(''); setPhone(''); setDob(''); setGender(''); 
     setLicense(''); setSpecialization(''); setAddress('');
@@ -43,7 +42,6 @@ export const LoginPage = () => {
     setMessage('');
 
     if (isSignUp) {
-      // 1. Supabase Auth Signup
       const { data, error } = await supabase.auth.signUp({
         email: email,
         password: password,
@@ -58,9 +56,7 @@ export const LoginPage = () => {
       if (error) {
         setMessage('Error: ' + error.message);
       } else {
-        // 2. FastAPI Database Request
         try {
-          // Jo role hai, uske hisaab se payload banayenge
           const payload = {
             name: name,
             email: email,
@@ -87,7 +83,6 @@ export const LoginPage = () => {
         }
       }
     } else {
-      // LOG IN LOGIC
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
@@ -105,17 +100,23 @@ export const LoginPage = () => {
 
   return (
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
-      <div className="w-full max-w-lg bg-white rounded-xl shadow-sm border p-8 space-y-6 transition-all duration-300">
-        <div className="text-center space-y-2">
-          <Link to="/" className="inline-flex items-center gap-2 text-primary font-bold text-2xl mb-2">
+      <div className="w-full max-w-lg bg-white rounded-xl shadow-sm border p-8 space-y-6 transition-all duration-300 relative">
+        
+        {/* === BACK TO HOME BUTTON === */}
+        <Link to="/" className="absolute top-6 left-6 text-slate-400 hover:text-primary flex items-center gap-1.5 text-sm font-medium transition-colors">
+          <ArrowLeft className="w-4 h-4" /> Home
+        </Link>
+
+        <div className="text-center space-y-2 pt-4">
+          <div className="inline-flex items-center gap-2 text-primary font-bold text-2xl mb-2">
             <Activity className="h-8 w-8" />
-            <span>UPHRP</span>
-          </Link>
+            <span>UPHAR</span>
+          </div>
           <h1 className="text-2xl font-bold text-slate-900 flex items-center justify-center gap-2">
             {isSignUp ? <><UserPlus className="w-6 h-6 text-primary"/> Create Account</> : <><LogIn className="w-6 h-6 text-primary"/> Welcome Back</>}
           </h1>
           <p className="text-sm text-slate-500">
-            {isSignUp ? 'Join UPHRP to manage medical records securely' : 'Sign in to access your dashboard'}
+            {isSignUp ? 'Join UPHAR to manage medical records securely' : 'Sign in to access your dashboard'}
           </p>
         </div>
 
@@ -139,11 +140,8 @@ export const LoginPage = () => {
         </div>
 
         <form onSubmit={handleAuth} className="space-y-4">
-          
-          {/* ================= DYNAMIC SIGN UP FIELDS ================= */}
           {isSignUp && (
             <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
-              
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-slate-700">
@@ -170,7 +168,6 @@ export const LoginPage = () => {
                 </div>
               </div>
 
-              {/* PATIENT ONLY FIELDS */}
               {role === 'patient' && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -189,7 +186,6 @@ export const LoginPage = () => {
                 </div>
               )}
 
-              {/* DOCTOR ONLY FIELDS */}
               {role === 'doctor' && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -209,7 +205,6 @@ export const LoginPage = () => {
                 </div>
               )}
 
-              {/* HOSPITAL ONLY FIELDS */}
               {role === 'hospital' && (
                 <div className="space-y-4">
                   <div className="space-y-2">
@@ -222,10 +217,8 @@ export const LoginPage = () => {
                   </div>
                 </div>
               )}
-
             </div>
           )}
-          {/* ======================================================== */}
 
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-700">

@@ -13,12 +13,14 @@ import { PatientDetail } from '@/pages/doctor/PatientDetail';
 
 import { LandingPage } from '@/pages/public/LandingPage';
 import { LoginPage } from '@/pages/auth/LoginPage';
+
 import { PatientDashboard } from '@/pages/patient/Dashboard';
 import { PatientTimeline } from '@/pages/patient/Timeline';
 import { PatientRecords } from '@/pages/patient/Records';
 import { PatientConsents } from '@/pages/patient/Consents';
 import { PatientActivity } from '@/pages/patient/Activity';
 import { PatientEmergency } from '@/pages/patient/Emergency';
+import { PatientSettings } from '@/pages/patient/Settings';
 
 import { HospitalDashboard } from '@/pages/hospital/Dashboard';
 import { AddRecord } from '@/pages/hospital/AddRecord';
@@ -44,6 +46,7 @@ export const AppRoutes = () => {
           <Route path="consents" element={<PatientConsents />} />
           <Route path="activity" element={<PatientActivity />} />
           <Route path="emergency" element={<PatientEmergency />} />
+          <Route path="settings" element={<PatientSettings />} />
         </Route>
 
         {/* Hospital App Routes */}

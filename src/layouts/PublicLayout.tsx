@@ -17,8 +17,11 @@ export const PublicLayout = () => {
           {/* Main Navigation Links (App Style) */}
           <nav className="hidden md:flex items-center gap-8">
             <Link to="/" className="text-sm font-semibold text-slate-700 hover:text-primary transition-colors">Home</Link>
-            <a href="#features" className="text-sm font-semibold text-slate-600 hover:text-primary transition-colors">Features</a>
-            <a href="#preview" className="text-sm font-semibold text-slate-600 hover:text-primary transition-colors">App Preview</a>
+            
+            {/* DHYAAN DO: Yahan humne /# lagaya hai */}
+            <a href="/#features" className="text-sm font-semibold text-slate-600 hover:text-primary transition-colors">Features</a>
+            <a href="/#preview" className="text-sm font-semibold text-slate-600 hover:text-primary transition-colors">App Preview</a>
+            
             <Link to="/how-it-works" className="text-sm font-semibold text-slate-600 hover:text-primary transition-colors">How it works</Link>
           </nav>
 

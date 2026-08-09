@@ -1,5 +1,5 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Activity, FileText, FileBadge, ShieldAlert, User, LogOut, History } from 'lucide-react'; // <-- Added History icon
+import { LayoutDashboard, Activity, FileText, FileBadge, ShieldAlert, User, LogOut, History, Settings } from 'lucide-react'; // <-- Added History icon
 
 export const PatientLayout = () => {
   const location = useLocation();
@@ -11,6 +11,7 @@ export const PatientLayout = () => {
     { name: 'Consents', href: '/patient/consents', icon: FileBadge },
     { name: 'Activity Log', href: '/patient/activity', icon: History }, // <-- Added Activity Log
     { name: 'Emergency Profile', href: '/patient/emergency', icon: ShieldAlert },
+    { name: 'Settings', href: '/patient/settings', icon: Settings },
   ];
 
   return (
@@ -19,7 +20,7 @@ export const PatientLayout = () => {
       <aside className="w-64 bg-white border-r hidden md:flex flex-col">
         <div className="h-16 flex items-center px-6 border-b">
           <Activity className="h-6 w-6 text-primary mr-2" />
-          <span className="font-bold text-xl text-slate-900">UPHRP</span>
+          <span className="font-bold text-xl text-slate-900">UPHAR</span>
         </div>
         
         <nav className="flex-1 px-4 py-6 space-y-1">
@@ -56,7 +57,7 @@ export const PatientLayout = () => {
         <header className="h-16 bg-white border-b flex items-center justify-between px-4 sm:px-6 lg:px-8">
           <div className="md:hidden flex items-center">
             <Activity className="h-6 w-6 text-primary mr-2" />
-            <span className="font-bold text-lg">UPHRP</span>
+            <span className="font-bold text-lg">UPHAR</span>
           </div>
           <div className="flex items-center ml-auto gap-4">
             <div className="flex items-center gap-2">
