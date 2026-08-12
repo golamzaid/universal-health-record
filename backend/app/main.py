@@ -108,3 +108,9 @@ def update_consent_status(consent_id: int, status_update: schemas.ConsentUpdate,
     db.commit()
     db.refresh(db_consent)
     return db_consent
+
+
+# 4. Get all consents for a specific doctor (Used by Doctor's My Patients page)
+@app.get("/doctors/{doctor_id}/consents", response_model=list[schemas.ConsentResponse])
+def get_doctor_consents(doctor_id: int, db: Session = Depends(get_db)):
+    return db.query(models.Consent).filter(models.Consent.doctor_id == doctor_id).all()
