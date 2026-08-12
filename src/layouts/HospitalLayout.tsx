@@ -16,7 +16,7 @@ export const HospitalLayout = () => {
       <aside className="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col">
         <div className="h-16 flex items-center px-6 border-b border-slate-800 bg-slate-950">
           <Activity className="h-6 w-6 text-primary mr-2" />
-          <span className="font-bold text-xl text-white">UPHRP Provider</span>
+          <span className="font-bold text-xl text-white">UPHAR Provider</span>
         </div>
         
         <div className="px-6 py-4 border-b border-slate-800">

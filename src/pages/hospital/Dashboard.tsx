@@ -1,170 +1,133 @@
 import { useState, useEffect } from 'react';
+import { Users, FileText, CheckCircle, FilePlus, ArrowRight, Activity, Loader2 } from 'lucide-react';
+import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/Button';
-import { Input } from '@/components/ui/Input';
-import { UploadCloud, Search, CheckCircle, AlertCircle, FileText, UserCheck } from 'lucide-react';
 import { supabase } from '@/supabaseClient';
 
 export const HospitalDashboard = () => {
-  const [hospitalName, setHospitalName] = useState('Authorized Hospital');
-  
-  // Step Management: 1 = Search, 2 = Verify, 3 = Upload
-  const [step, setStep] = useState(1);
-  const [patientData, setPatientData] = useState<any>(null);
-  
-  const [upharId, setUpharId] = useState('');
-  const [title, setTitle] = useState('');
-  const [category, setCategory] = useState('Lab Result');
-  const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  
-  const [loading, setLoading] = useState(false);
-  const [message, setMessage] = useState<{ type: 'success' | 'error', text: string } | null>(null);
+  const [hospitalName, setHospitalName] = useState('');
+  const [patientCount, setPatientCount] = useState(0);
+  const [isFetching, setIsFetching] = useState(true); // Naya loading state
 
   useEffect(() => {
-    const fetchHospitalData = async () => {
+    const fetchData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
-      if (user) {
-        try {
-          const res = await fetch('http://127.0.0.1:8000/users/');
-          const users = await res.json();
+      try {
+        // Fetch all users from backend
+        const res = await fetch('http://127.0.0.1:8000/users/');
+        const users = await res.json();
+        
+        // 1. Set Hospital Name
+        if (user) {
           const dbUser = users.find((u: any) => u.email === user.email);
           if (dbUser) setHospitalName(dbUser.name);
-        } catch (err) {}
+        }
+
+        // 2. Count total registered patients in the network
+        const totalPatients = users.filter((u: any) => u.role === 'patient').length;
+        setPatientCount(totalPatients);
+
+      } catch (err) {
+        console.error("Could not fetch dashboard data", err);
+      } finally {
+        // Data aane ke baad loading band kar do
+        setIsFetching(false);
       }
     };
-    fetchHospitalData();
+    fetchData();
   }, []);
 
-  const handleSearchVerify = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    setMessage(null);
-    try {
-      const numericId = upharId.replace(/[^0-9]/g, '');
-      const usersRes = await fetch('http://127.0.0.1:8000/users/');
-      const users = await usersRes.json();
-      
-      const patient = users.find((u: any) => String(u.id) === numericId && u.role === 'patient');
-      if (!patient) {
-        setMessage({ type: 'error', text: 'Patient not found! Please check the UPHAR ID.' });
-      } else {
-        setPatientData(patient);
-        setStep(2); // Move to verification step
-      }
-    } catch (error) {
-      setMessage({ type: 'error', text: 'Server error. Is FastAPI running?' });
-    } finally {
-      setLoading(false);
-    }
-  };
+  // Jab tak data aa raha hai, ek mast sa loading spinner dikhao
+  if (isFetching) {
+    return (
+      <div className="flex flex-col items-center justify-center min-h-[60vh] text-primary">
+        <Loader2 className="w-10 h-10 animate-spin mb-4" />
+        <p className="font-medium text-slate-500">Loading Dashboard Data...</p>
+      </div>
+    );
+  }
 
-  const handleUpload = async (e: React.FormEvent) => {
-    e.preventDefault();
-    setLoading(true);
-    try {
-      const recordData = { title, category, date, provider_name: hospitalName };
-      const response = await fetch(`http://127.0.0.1:8000/users/${patientData.id}/records`, {
-        method: 'POST',
-        headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify(recordData)
-      });
-
-      if (response.ok) {
-        setMessage({ type: 'success', text: `Record successfully uploaded to ${patientData.name}'s timeline!` });
-        setStep(1); setUpharId(''); setTitle(''); setPatientData(null); // Reset
-      } else {
-        setMessage({ type: 'error', text: 'Failed to save record.' });
-      }
-    } catch (error) {
-      setMessage({ type: 'error', text: 'Server error.' });
-    } finally {
-      setLoading(false);
-    }
-  };
+  const stats = [
+    { name: 'Total Patients in Network', value: patientCount.toString(), icon: Users, color: 'text-blue-600', bg: 'bg-blue-100' },
+    { name: 'Records Uploaded (This Month)', value: '124', icon: FileText, color: 'text-purple-600', bg: 'bg-purple-100' },
+    { name: 'Pending Approvals', value: '3', icon: CheckCircle, color: 'text-orange-600', bg: 'bg-orange-100' },
+  ];
 
   return (
-    <div className="max-w-4xl mx-auto space-y-8">
-      <div>
-        <h1 className="text-3xl font-bold text-slate-900">Upload Medical Record</h1>
-        <p className="text-slate-500 mt-2">Verify patient identity before pushing medical records to their timeline.</p>
+    <div className="max-w-6xl mx-auto space-y-8 animate-in fade-in duration-300">
+      
+      {/* Welcome Banner */}
+      <div className="bg-white border rounded-2xl p-8 shadow-sm flex flex-col md:flex-row items-start md:items-center justify-between gap-6 relative overflow-hidden">
+        <div className="absolute right-0 top-0 w-64 h-64 bg-primary/5 rounded-full blur-3xl -translate-y-1/2 translate-x-1/3"></div>
+        <div className="relative z-10">
+          <h1 className="text-3xl font-bold text-slate-900">Welcome back, {hospitalName}!</h1>
+          <p className="text-slate-500 mt-2 text-lg">Manage your patients and upload verified medical records securely.</p>
+        </div>
+        <div className="relative z-10 flex gap-4 w-full md:w-auto">
+          <Link to="/hospital/add-record" className="w-full md:w-auto">
+            <Button className="w-full gap-2 shadow-lg h-12 text-base px-6">
+              <FilePlus className="w-5 h-5" /> New Upload
+            </Button>
+          </Link>
+        </div>
       </div>
 
-      <div className="bg-white border rounded-2xl shadow-sm overflow-hidden p-6">
-        {/* Status Messages */}
-        {message && (
-          <div className={`mb-6 p-4 rounded-xl flex items-center gap-3 text-sm font-medium ${message.type === 'success' ? 'bg-green-50 text-green-700 border-green-200' : 'bg-red-50 text-red-700 border-red-200'} border`}>
-            {message.type === 'success' ? <CheckCircle className="w-5 h-5"/> : <AlertCircle className="w-5 h-5"/>}
-            {message.text}
-          </div>
-        )}
-
-        {/* STEP 1: Search */}
-        {step === 1 && (
-          <form onSubmit={handleSearchVerify} className="space-y-4 animate-in fade-in">
-            <h2 className="text-lg font-semibold text-slate-900 border-b pb-2">Step 1: Locate Patient</h2>
-            <div className="space-y-3">
-              <label className="text-sm font-bold text-slate-900 flex items-center gap-2">
-                <Search className="w-4 h-4 text-blue-600"/> Find Patient by UPHAR ID
-              </label>
-              <div className="flex gap-4">
-                <Input type="text" placeholder="e.g. UPH-105" required value={upharId} onChange={(e) => setUpharId(e.target.value.toUpperCase())} className="font-mono uppercase max-w-sm h-12 text-lg" />
-                <Button type="submit" className="h-12 px-8" disabled={loading}>{loading ? 'Searching...' : 'Search'}</Button>
-              </div>
+      {/* Stats Grid */}
+      <div className="grid grid-cols-1 gap-6 sm:grid-cols-3">
+        {stats.map((stat) => (
+          <div key={stat.name} className="bg-white p-6 rounded-2xl border shadow-sm flex items-center gap-5 hover:shadow-md transition-shadow">
+            <div className={`p-4 rounded-xl ${stat.bg}`}>
+              <stat.icon className={`h-8 w-8 ${stat.color}`} />
             </div>
-          </form>
-        )}
-
-        {/* STEP 2: Verify */}
-        {step === 2 && patientData && (
-          <div className="space-y-6 animate-in slide-in-from-right-8 duration-300">
-            <h2 className="text-lg font-semibold text-slate-900 border-b pb-2">Step 2: Verify Identity</h2>
-            <div className="bg-blue-50 border border-blue-200 rounded-xl p-6">
-              <div className="grid grid-cols-2 gap-4">
-                <div><p className="text-sm text-blue-600 font-medium">Patient Name</p><p className="text-xl font-bold text-blue-900">{patientData.name}</p></div>
-                <div><p className="text-sm text-blue-600 font-medium">Contact Details</p><p className="text-lg font-semibold text-blue-900">{patientData.phone || patientData.email}</p></div>
-                <div><p className="text-sm text-blue-600 font-medium">Date of Birth</p><p className="text-lg font-semibold text-blue-900">{patientData.dob || 'Not Provided'}</p></div>
-                <div><p className="text-sm text-blue-600 font-medium">Gender</p><p className="text-lg font-semibold text-blue-900">{patientData.gender || 'Not Provided'}</p></div>
-              </div>
-            </div>
-            <div className="flex gap-4 pt-2">
-              <Button variant="outline" onClick={() => setStep(1)} className="flex-1 text-slate-600 hover:bg-slate-100">Wrong Patient (Go Back)</Button>
-              <Button onClick={() => setStep(3)} className="flex-1 bg-green-600 hover:bg-green-700 gap-2"><UserCheck className="w-5 h-5"/> Yes, Verify & Proceed</Button>
+            <div>
+              <p className="text-sm font-semibold text-slate-500 uppercase tracking-wider">{stat.name}</p>
+              <p className="text-3xl font-bold text-slate-900 mt-1">{stat.value}</p>
             </div>
           </div>
-        )}
+        ))}
+      </div>
 
-        {/* STEP 3: Upload Form */}
-        {step === 3 && (
-          <form onSubmit={handleUpload} className="space-y-6 animate-in slide-in-from-right-8 duration-300">
-            <div className="flex items-center justify-between border-b pb-4">
-              <h2 className="text-lg font-semibold text-slate-900">Step 3: Document Details</h2>
-              <span className="bg-green-100 text-green-700 px-3 py-1 rounded-full text-xs font-bold flex items-center gap-1"><CheckCircle className="w-3 h-3"/> Verified: {patientData?.name}</span>
-            </div>
+      {/* Quick Actions & Info */}
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+        
+        {/* Quick Actions */}
+        <div className="bg-white border rounded-2xl shadow-sm p-6">
+          <h2 className="text-xl font-bold text-slate-900 mb-6 flex items-center gap-2">
+            <Activity className="w-6 h-6 text-primary" /> Quick Actions
+          </h2>
+          <div className="space-y-4">
+            <Link to="/hospital/add-record" className="flex items-center justify-between p-4 rounded-xl border hover:bg-slate-50 transition-colors group">
+              <div>
+                <h3 className="font-semibold text-slate-900 group-hover:text-primary transition-colors">Upload Medical Record</h3>
+                <p className="text-sm text-slate-500 mt-1">Push lab results to a patient's timeline</p>
+              </div>
+              <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-primary transition-transform group-hover:translate-x-1" />
+            </Link>
             
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-              <div className="space-y-2"><label className="text-sm font-medium text-slate-700">Record Title</label><Input type="text" placeholder="e.g. Complete Blood Count" required value={title} onChange={(e) => setTitle(e.target.value)} /></div>
-              <div className="space-y-2">
-                <label className="text-sm font-medium text-slate-700">Category</label>
-                <select className="flex h-10 w-full rounded-md border border-slate-300 px-3 py-2 text-sm focus:outline-none focus:ring-2 focus:ring-primary" value={category} onChange={(e) => setCategory(e.target.value)}>
-                  <option value="Lab Result">Lab Result</option>
-                  <option value="Prescription">Prescription</option>
-                  <option value="Consultation Note">Consultation Note</option>
-                  <option value="Imaging/MRI">Imaging/MRI</option>
-                </select>
+            <Link to="/hospital/patients" className="flex items-center justify-between p-4 rounded-xl border hover:bg-slate-50 transition-colors group">
+              <div>
+                <h3 className="font-semibold text-slate-900 group-hover:text-primary transition-colors">View Patient Directory</h3>
+                <p className="text-sm text-slate-500 mt-1">Search and manage existing patients</p>
               </div>
-            </div>
-            <div className="space-y-2"><label className="text-sm font-medium text-slate-700">Date</label><Input type="date" required value={date} onChange={(e) => setDate(e.target.value)} className="w-full md:w-1/2" /></div>
+              <ArrowRight className="w-5 h-5 text-slate-400 group-hover:text-primary transition-transform group-hover:translate-x-1" />
+            </Link>
+          </div>
+        </div>
 
-            <div className="border-2 border-dashed border-slate-200 rounded-xl p-8 text-center hover:bg-slate-50 cursor-pointer">
-              <FileText className="w-10 h-10 text-slate-400 mx-auto mb-3" />
-              <p className="text-sm font-medium text-slate-700">Click to upload PDF or Image</p>
-            </div>
+        {/* System Status / Notice */}
+        <div className="bg-slate-900 rounded-2xl shadow-sm p-6 text-white relative overflow-hidden">
+          <div className="absolute -right-10 -top-10 w-40 h-40 bg-white/10 rounded-full blur-2xl"></div>
+          <h2 className="text-xl font-bold mb-4 flex items-center gap-2 relative z-10">
+            <CheckCircle className="w-6 h-6 text-green-400" /> UPHAR System Status
+          </h2>
+          <p className="text-slate-300 mb-6 relative z-10 leading-relaxed">
+            All systems are fully operational. Data synchronization with the central database is active. Remember to verify patient UPHAR IDs before uploading sensitive medical documents.
+          </p>
+          <div className="bg-white/10 rounded-lg p-4 backdrop-blur-sm relative z-10 border border-white/20">
+            <p className="text-sm font-medium text-slate-200">Current API Connection: <span className="text-green-400 font-bold ml-2">Secure & Encrypted</span></p>
+          </div>
+        </div>
 
-            <div className="flex gap-4 pt-4">
-              <Button type="button" variant="outline" onClick={() => setStep(2)}>Back</Button>
-              <Button type="submit" className="flex-1 gap-2" disabled={loading}><UploadCloud className="w-5 h-5"/> {loading ? 'Uploading...' : 'Securely Upload to Timeline'}</Button>
-            </div>
-          </form>
-        )}
       </div>
     </div>
   );

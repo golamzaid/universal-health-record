@@ -4,6 +4,7 @@ import { BrowserRouter, Routes, Route } from 'react-router-dom';
 import { PublicLayout } from '@/layouts/PublicLayout';
 import { PatientLayout } from '@/layouts/PatientLayout';
 import { HospitalLayout } from '@/layouts/HospitalLayout';
+import { PatientDirectory } from '@/pages/hospital/PatientDirectory';
 
 import { DoctorLayout } from '@/layouts/DoctorLayout';
 import { DoctorDashboard } from '@/pages/doctor/Dashboard';
@@ -53,7 +54,7 @@ export const AppRoutes = () => {
         <Route path="/hospital" element={<HospitalLayout />}>
           <Route path="dashboard" element={<HospitalDashboard />} />
           <Route path="add-record" element={<AddRecord />} />
-          <Route path="patients" element={<div className="p-4">Patient Directory (Step 7)</div>} />
+          <Route path="patients" element={<PatientDirectory />} />
         </Route>
 
        {/* Doctor App Routes */}
