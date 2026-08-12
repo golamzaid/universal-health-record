@@ -77,3 +77,34 @@ def create_record(record: schemas.RecordCreate, db: Session = Depends(get_db)):
 @app.get("/users/{user_id}/records", response_model=list[schemas.RecordResponse])
 def get_user_records(user_id: int, db: Session = Depends(get_db)):
     return db.query(models.MedicalRecord).filter(models.MedicalRecord.patient_id == user_id).all()
+
+
+# ==========================================
+# CONSENT MANAGEMENT ROUTES
+# ==========================================
+
+# 1. Create a new consent request (Used by Doctor)
+@app.post("/consents/", response_model=schemas.ConsentResponse)
+def create_consent_request(consent: schemas.ConsentCreate, db: Session = Depends(get_db)):
+    new_consent = models.Consent(**consent.dict())
+    db.add(new_consent)
+    db.commit()
+    db.refresh(new_consent)
+    return new_consent
+
+# 2. Get all consents for a specific patient (Used by Patient Dashboard)
+@app.get("/users/{user_id}/consents", response_model=list[schemas.ConsentResponse])
+def get_patient_consents(user_id: int, db: Session = Depends(get_db)):
+    return db.query(models.Consent).filter(models.Consent.patient_id == user_id).all()
+
+# 3. Update consent status (Used by Patient to Approve/Reject/Revoke)
+@app.put("/consents/{consent_id}", response_model=schemas.ConsentResponse)
+def update_consent_status(consent_id: int, status_update: schemas.ConsentUpdate, db: Session = Depends(get_db)):
+    db_consent = db.query(models.Consent).filter(models.Consent.id == consent_id).first()
+    if not db_consent:
+        raise HTTPException(status_code=404, detail="Consent request not found")
+
+    db_consent.status = status_update.status
+    db.commit()
+    db.refresh(db_consent)
+    return db_consent

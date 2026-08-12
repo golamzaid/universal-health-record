@@ -41,3 +41,24 @@ class MedicalRecord(Base):
     date = Column(DateTime, default=datetime.datetime.utcnow)
     
     patient = relationship("User", back_populates="records")
+    
+    # 3. Consents Table
+class Consent(Base):
+    __tablename__ = "consents"
+    
+    id = Column(Integer, primary_key=True, index=True)
+    patient_id = Column(Integer, ForeignKey("users.id"))
+    doctor_id = Column(Integer, ForeignKey("users.id"))
+    
+    # UI mein dikhane ke liye extra info
+    doctor_name = Column(String)
+    hospital_name = Column(String) 
+    
+    access_type = Column(String)  # 'VIEW' or 'MODIFY'
+    duration = Column(String)     # '24 Hours', '7 Days', etc.
+    status = Column(String, default="PENDING")  # PENDING, ACTIVE, REJECTED, REVOKED
+    request_date = Column(DateTime, default=datetime.datetime.utcnow)
+
+    # Relationships (Optional but good for SQLAlchemy)
+    patient = relationship("User", foreign_keys=[patient_id])
+    doctor = relationship("User", foreign_keys=[doctor_id])

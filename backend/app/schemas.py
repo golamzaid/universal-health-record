@@ -62,3 +62,29 @@ class RecordResponse(BaseModel):
     date: datetime
     class Config:
         from_attributes = True
+        
+# --- Consent Schemas (NEW) ---
+class ConsentCreate(BaseModel):
+    patient_id: int
+    doctor_id: int
+    doctor_name: str
+    hospital_name: str
+    access_type: str
+    duration: str
+
+class ConsentUpdate(BaseModel):
+    status: str  # APPROVE, REJECT, REVOKE karne ke liye
+
+class ConsentResponse(BaseModel):
+    id: int
+    patient_id: int
+    doctor_id: int
+    doctor_name: str
+    hospital_name: str
+    access_type: str
+    duration: str
+    status: str
+    request_date: datetime
+
+    class Config:
+        from_attributes = True

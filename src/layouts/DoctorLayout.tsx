@@ -1,8 +1,38 @@
 import { Link, Outlet, useLocation } from 'react-router-dom';
-import { LayoutDashboard, Users, Search, Activity, LogOut, Stethoscope } from 'lucide-react';
+import { LayoutDashboard, Users, Search, LogOut, Stethoscope } from 'lucide-react';
+import { useState, useEffect } from 'react';
+import { supabase } from '@/supabaseClient';
 
 export const DoctorLayout = () => {
   const location = useLocation();
+  
+  // Real-time data ke liye state
+  const [doctorName, setDoctorName] = useState('Loading...');
+  const [doctorSpec, setDoctorSpec] = useState('Doctor');
+  const [doctorLicense, setDoctorLicense] = useState('');
+
+  // Logged-in doctor ki details fetch karo
+  useEffect(() => {
+    const fetchDoctorDetails = async () => {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (user) {
+        try {
+          const res = await fetch('http://127.0.0.1:8000/users/');
+          const users = await res.json();
+          const dbUser = users.find((u: any) => u.email === user.email);
+          
+          if (dbUser) {
+            setDoctorName(dbUser.name);
+            setDoctorSpec(dbUser.specialization || 'General Practice');
+            setDoctorLicense(dbUser.license_number || 'N/A');
+          }
+        } catch (error) {
+          console.error("Error fetching doctor details:", error);
+        }
+      }
+    };
+    fetchDoctorDetails();
+  }, []);
 
   const navigation = [
     { name: 'Dashboard', href: '/doctor/dashboard', icon: LayoutDashboard },
@@ -15,12 +45,13 @@ export const DoctorLayout = () => {
       <aside className="w-64 bg-slate-900 text-slate-300 hidden md:flex flex-col">
         <div className="h-16 flex items-center px-6 border-b border-slate-800 bg-slate-950">
           <Stethoscope className="h-6 w-6 text-primary mr-2" />
-          <span className="font-bold text-xl text-white">UPHRP Doctor</span>
+          <span className="font-bold text-xl text-white">UPHAR Doctor</span>
         </div>
         
+        {/* Dynamic Doctor Name & Specialization */}
         <div className="px-6 py-4 border-b border-slate-800">
-          <p className="text-sm font-medium text-white">Dr. Sarah Smith</p>
-          <p className="text-xs text-slate-400 mt-0.5">Cardiology • ABC Hospital</p>
+          <p className="text-sm font-medium text-white">{doctorName}</p>
+          <p className="text-xs text-slate-400 mt-0.5">{doctorSpec}</p>
         </div>
         
         <nav className="flex-1 px-4 py-6 space-y-1">
@@ -31,8 +62,8 @@ export const DoctorLayout = () => {
                 key={item.name}
                 to={item.href}
                 className={`flex items-center px-3 py-2.5 rounded-md text-sm font-medium transition-colors ${
-                  isActive 
-                    ? 'bg-primary text-white' 
+                  isActive
+                    ? 'bg-primary text-white'
                     : 'hover:bg-slate-800 hover:text-white'
                 }`}
               >
@@ -42,20 +73,22 @@ export const DoctorLayout = () => {
             );
           })}
         </nav>
-
         <div className="p-4 border-t border-slate-800">
-          <Link to="/login" className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-red-400 hover:bg-slate-800 transition-colors">
+          <Link 
+            to="/login" 
+            onClick={() => supabase.auth.signOut()} // Asli Logout function
+            className="flex items-center px-3 py-2 rounded-md text-sm font-medium text-red-400 hover:bg-slate-800 transition-colors"
+          >
             <LogOut className="mr-3 h-5 w-5 opacity-80" />
             Sign Out
           </Link>
         </div>
       </aside>
-
       <main className="flex-1 flex flex-col min-w-0 overflow-hidden">
         <header className="h-16 bg-white border-b flex items-center justify-end px-4 sm:px-6 lg:px-8">
-           <span className="text-sm font-medium text-slate-700">License: MED-908234</span>
+           {/* Dynamic License Number */}
+           <span className="text-sm font-medium text-slate-700">License: {doctorLicense}</span>
         </header>
-
         <div className="flex-1 overflow-auto p-4 sm:p-6 lg:p-8">
           <Outlet />
         </div>

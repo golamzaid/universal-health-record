@@ -36,10 +36,17 @@ export const AddRecord = () => {
     e.preventDefault();
     setLoading(true); setMessage(null);
     try {
-      const numericId = upharId.replace(/[^0-9]/g, '');
+      // FIX: Format the ID properly
+      let searchId = upharId.trim().toUpperCase();
+      if (/^\d+$/.test(searchId)) {
+        searchId = `UPH-${searchId}`;
+      }
+
       const usersRes = await fetch('http://127.0.0.1:8000/users/');
       const users = await usersRes.json();
-      const patient = users.find((u: any) => String(u.id) === numericId && u.role === 'patient');
+      
+      // FIX: Match against uphar_id
+      const patient = users.find((u: any) => u.uphar_id === searchId && u.role === 'patient');
       
       if (!patient) {
         setMessage({ type: 'error', text: 'Patient not found! Please check the UPHAR ID.' });
