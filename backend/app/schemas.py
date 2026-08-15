@@ -60,6 +60,7 @@ class RecordResponse(BaseModel):
     provider_name: str
     category: str
     date: datetime
+    file_url: Optional[str] = None # <-- YEH NAYI LINE HAI
     class Config:
         from_attributes = True
         

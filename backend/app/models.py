@@ -39,7 +39,7 @@ class MedicalRecord(Base):
     provider_name = Column(String)
     category = Column(String)
     date = Column(DateTime, default=datetime.datetime.utcnow)
-    
+    file_url = Column(String, nullable=True) # <-- YEH NAYI LINE HAI
     patient = relationship("User", back_populates="records")
     
     # 3. Consents Table

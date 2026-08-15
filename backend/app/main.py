@@ -1,3 +1,7 @@
+import os
+import shutil
+from fastapi import File, UploadFile, Form
+from fastapi.staticfiles import StaticFiles
 from fastapi import FastAPI, Depends, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from sqlalchemy.orm import Session
@@ -7,8 +11,11 @@ import random
 import string
 
 models.Base.metadata.create_all(bind=engine)
-
 app = FastAPI(title="UPHAR API")
+
+os.makedirs("uploads", exist_ok=True)
+app.mount("/uploads", StaticFiles(directory="uploads"), name="uploads")
+
 
 app.add_middleware(
     CORSMiddleware,
@@ -66,9 +73,33 @@ def update_user_settings(user_id: int, settings: schemas.UserUpdate, db: Session
     return db_user
 # ===================================
 
+# === UPDATE RECORD ROUTE TO HANDLE FILES ===
 @app.post("/records/", response_model=schemas.RecordResponse)
-def create_record(record: schemas.RecordCreate, db: Session = Depends(get_db)):
-    new_record = models.MedicalRecord(**record.dict())
+def create_record(
+    patient_id: int = Form(...),
+    title: str = Form(...),
+    category: str = Form(...),
+    provider_name: str = Form(...),
+    date: str = Form(...),
+    file: UploadFile = File(None), # File optional hai
+    db: Session = Depends(get_db)
+):
+    file_url = None
+    if file:
+        file_location = f"uploads/{file.filename}"
+        with open(file_location, "wb+") as file_object:
+            shutil.copyfileobj(file.file, file_object)
+        file_url = f"http://127.0.0.1:8000/uploads/{file.filename}"
+
+    # FIX: Tumhare models.py mein class ka naam MedicalRecord hai
+    new_record = models.MedicalRecord(
+        patient_id=patient_id,
+        title=title,
+        category=category,
+        provider_name=provider_name,
+        date=date,
+        file_url=file_url
+    )
     db.add(new_record)
     db.commit()
     db.refresh(new_record)
