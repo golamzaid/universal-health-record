@@ -1,15 +1,16 @@
 import { useState, useEffect } from 'react';
 import { StatusBadge } from '@/components/Badges/StatusBadge';
-import { Activity, Stethoscope, TestTube, Pill, FileText } from 'lucide-react';
+import { Activity, Stethoscope, TestTube, Pill, FileText, Eye } from 'lucide-react';
+import { Button } from '@/components/ui/Button';
 import { supabase } from '@/supabaseClient';
 
-// TypeScript ko data ka structure batao
 interface Record {
   id: number;
   title: string;
   provider_name: string;
   category: string;
   date: string;
+  file_url?: string;
 }
 
 export const PatientTimeline = () => {
@@ -19,24 +20,20 @@ export const PatientTimeline = () => {
   useEffect(() => {
     const fetchRecords = async () => {
       try {
-        // 1. Supabase se logged-in user nikalo
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) {
           setLoading(false);
           return;
         }
 
-        // 2. FastAPI se saare users fetch karke apni ID nikalo
         const usersResponse = await fetch('http://127.0.0.1:8000/users/');
         const users = await usersResponse.json();
         const dbUser = users.find((u: any) => u.email === user.email);
 
         if (dbUser) {
-          // 3. Apni ID ke records fetch karo
           const recordsResponse = await fetch(`http://127.0.0.1:8000/users/${dbUser.id}/records`);
           const recordsData = await recordsResponse.json();
           
-          // Latest records sabse upar dikhane ke liye sort karo
           const sortedRecords = recordsData.sort((a: any, b: any) => 
             new Date(b.date).getTime() - new Date(a.date).getTime()
           );
@@ -48,11 +45,9 @@ export const PatientTimeline = () => {
         setLoading(false);
       }
     };
-
     fetchRecords();
   }, []);
 
-  // Category ke hisaab se Icon aur Color set karne ka function
   const getCategoryStyle = (category: string) => {
     switch (category) {
       case 'Lab Result':
@@ -91,12 +86,10 @@ export const PatientTimeline = () => {
             
             return (
               <div key={event.id} className="relative pl-8 animate-in fade-in slide-in-from-bottom-4 duration-500">
-                {/* Timeline Dot */}
                 <div className={`absolute -left-[17px] top-1 flex h-8 w-8 items-center justify-center rounded-full border-4 border-white ${style.bg}`}>
                   <Icon className={`h-4 w-4 ${style.color}`} />
                 </div>
-
-                {/* Event Card */}
+                
                 <div className="bg-white border rounded-xl p-5 shadow-sm hover:shadow-md transition-shadow">
                   <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-4 mb-3">
                     <div>
@@ -110,10 +103,18 @@ export const PatientTimeline = () => {
                     </div>
                   </div>
                   
-                  <div className="flex flex-wrap items-center gap-3">
+                  <div className="flex flex-wrap items-center gap-3 w-full">
                     <span className="text-sm font-medium text-slate-700">{event.provider_name}</span>
                     <span className="text-slate-300">•</span>
                     <StatusBadge status="PROVIDER_VERIFIED" />
+                    
+                    {event.file_url && (
+                      <a href={event.file_url} target="_blank" rel="noopener noreferrer" className="ml-auto">
+                        <Button variant="outline" size="sm" className="h-8 gap-1.5 text-primary border-primary/20 hover:bg-primary/5">
+                          <Eye className="w-3.5 h-3.5" /> View File
+                        </Button>
+                      </a>
+                    )}
                   </div>
                 </div>
               </div>

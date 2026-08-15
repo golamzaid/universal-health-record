@@ -9,7 +9,6 @@ export const SearchPatient = () => {
   const [searchStatus, setSearchStatus] = useState<'IDLE' | 'SEARCHING' | 'FOUND' | 'REQUEST_SENT'>('IDLE');
   const [upharId, setUpharId] = useState('');
   const [showRequestForm, setShowRequestForm] = useState(false);
-  const [accessType, setAccessType] = useState('VIEW');
   const [duration, setDuration] = useState('24 Hours');
   const [error, setError] = useState('');
 
@@ -36,7 +35,6 @@ export const SearchPatient = () => {
     setError('');
     
     try {
-      // FIX: Agar user ne sirf number dala (140151), toh UPH- aage laga do
       let searchId = upharId.trim().toUpperCase();
       if (/^\d+$/.test(searchId)) {
         searchId = `UPH-${searchId}`;
@@ -45,7 +43,6 @@ export const SearchPatient = () => {
       const res = await fetch('http://127.0.0.1:8000/users/');
       const users = await res.json();
       
-      // FIX: Ab direct uphar_id column se match karenge!
       const patient = users.find((u: any) => u.uphar_id === searchId && u.role === 'patient');
       
       if (patient) {
@@ -70,7 +67,7 @@ export const SearchPatient = () => {
         doctor_id: doctorData.id,
         doctor_name: doctorData.name,
         hospital_name: doctorData.specialization || 'Independent Clinic',
-        access_type: accessType === 'VIEW' ? 'View Only' : 'View & Modify',
+        access_type: 'View & Modify', // Ab sirf Modify Access jayega
         duration: duration
       };
 
@@ -96,7 +93,7 @@ export const SearchPatient = () => {
     <div className="max-w-3xl space-y-6">
       <div>
         <h1 className="text-2xl font-bold text-slate-900">Search Patient</h1>
-        <p className="text-sm text-slate-500 mt-1">Enter a patient's UPHAR ID to view their medical history or request modification access.</p>
+        <p className="text-sm text-slate-500 mt-1">Enter a patient's UPHAR ID to view their medical history directly, or request modification access to add records.</p>
       </div>
 
       <div className="bg-white border rounded-xl shadow-sm p-6">
@@ -133,8 +130,8 @@ export const SearchPatient = () => {
           {!showRequestForm ? (
             <div className="space-y-4">
               <div className="bg-blue-50 text-blue-800 p-4 rounded-lg text-sm flex gap-2">
-                <Eye className="w-5 h-5 text-blue-600 shrink-0" />
-                <p>You can currently view this patient's medical timeline. To add or modify records, you must request authorization.</p>
+                <Eye className="w-5 h-5 text-blue-600 shrink-0 mt-0.5" />
+                <p>You can currently <strong>view</strong> this patient's medical timeline directly. To add new prescriptions or upload records, you must request modification access.</p>
               </div>
               
               <div className="flex flex-col sm:flex-row gap-4 pt-2">
@@ -152,21 +149,12 @@ export const SearchPatient = () => {
           ) : (
             <div className="space-y-6 animate-in slide-in-from-right-4">
               <h4 className="font-medium text-slate-900 flex items-center gap-2">
-                <ShieldAlert className="h-5 w-5 text-orange-500" /> Request Authorization
+                <ShieldAlert className="h-5 w-5 text-orange-500" /> Request Modification Access
               </h4>
               
-              <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
-                <label className={`border-2 rounded-xl p-4 cursor-pointer transition-colors ${accessType === 'VIEW' ? 'border-primary bg-primary/5' : 'border-slate-200 hover:border-primary/50'}`}>
-                  <input type="radio" name="access" className="sr-only" checked={accessType === 'VIEW'} onChange={() => setAccessType('VIEW')} />
-                  <Search className={`h-6 w-6 mb-2 ${accessType === 'VIEW' ? 'text-primary' : 'text-slate-400'}`} />
-                  <h5 className="font-semibold text-slate-900">View Only Access</h5>
-                </label>
-
-                <label className={`border-2 rounded-xl p-4 cursor-pointer transition-colors ${accessType === 'MODIFY' ? 'border-primary bg-primary/5' : 'border-slate-200 hover:border-primary/50'}`}>
-                  <input type="radio" name="access" className="sr-only" checked={accessType === 'MODIFY'} onChange={() => setAccessType('MODIFY')} />
-                  <FileEdit className={`h-6 w-6 mb-2 ${accessType === 'MODIFY' ? 'text-primary' : 'text-slate-400'}`} />
-                  <h5 className="font-semibold text-slate-900">View & Modify Access</h5>
-                </label>
+              <div className="bg-slate-50 border p-4 rounded-xl flex gap-3 text-sm text-slate-700">
+                 <FileEdit className="h-5 w-5 text-primary shrink-0" />
+                 <p>You are requesting <strong>Full Modify Access</strong> to upload records, add consultation notes, and issue digital prescriptions to this patient's timeline.</p>
               </div>
 
               <div className="space-y-2">
@@ -194,13 +182,14 @@ export const SearchPatient = () => {
         <div className="bg-green-50 border border-green-200 text-green-800 rounded-xl p-6 text-center animate-in zoom-in duration-300">
           <CheckCircle className="w-12 h-12 text-green-500 mx-auto mb-3" />
           <h3 className="text-lg font-bold mb-1">Authorization Request Sent!</h3>
-          <p className="text-sm">The patient has been notified. They need to approve this from their UPHAR portal.</p>
+          <p className="text-sm">The patient has been notified. They need to approve this from their UPHAR portal before you can modify records.</p>
+          
           <div className="flex justify-center gap-4 mt-6">
             <Button variant="outline" className="border-green-300 text-green-700 hover:bg-green-100" onClick={() => {setSearchStatus('IDLE'); setUpharId('');}}>
               Search Another Patient
             </Button>
             <Link to={`/doctor/patients/${patientData?.id}`}>
-              <Button className="bg-green-600 hover:bg-green-700 text-white">Go to Timeline</Button>
+              <Button className="bg-green-600 hover:bg-green-700 text-white">Go to Timeline (View Only)</Button>
             </Link>
           </div>
         </div>

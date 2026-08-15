@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, Link } from 'react-router-dom';
-import { ShieldCheck, Activity, TestTube, ArrowLeft, Plus, Eye, Lock, Pill, FileText, Stethoscope, Loader2, UploadCloud, CheckCircle } from 'lucide-react';
+import { ShieldCheck, Activity, TestTube, ArrowLeft, Plus, Eye, Lock, Pill, FileText, Stethoscope, Loader2, UploadCloud, CheckCircle, Clock } from 'lucide-react';
 import { StatusBadge } from '@/components/Badges/StatusBadge';
 import { Button } from '@/components/ui/Button';
 import { Input } from '@/components/ui/Input';
@@ -12,15 +12,16 @@ export const PatientDetail = () => {
   const [patient, setPatient] = useState<any>(null);
   const [records, setRecords] = useState<any[]>([]);
   const [hasModifyAccess, setHasModifyAccess] = useState(false);
+  const [isPendingAccess, setIsPendingAccess] = useState(false); // NAYA: Pending state ke liye
   const [loading, setLoading] = useState(true);
   const [doctorName, setDoctorName] = useState('');
 
   // Modal States
   const [showModal, setShowModal] = useState(false);
-  const [recordType, setRecordType] = useState<'Note' | 'Prescription'>('Note'); // NAYA: Better state management
+  const [recordType, setRecordType] = useState<'Note' | 'Prescription'>('Note');
   const [noteTitle, setNoteTitle] = useState('');
   const [savingNote, setSavingNote] = useState(false);
-  const [selectedFile, setSelectedFile] = useState<File | null>(null); // NAYA: File store karne ke liye
+  const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   useEffect(() => {
     const fetchPatientAndRecords = async () => {
@@ -43,10 +44,17 @@ export const PatientDetail = () => {
           const consentsRes = await fetch(`http://127.0.0.1:8000/users/${dbPatient.id}/consents`);
           const consentsData = await consentsRes.json();
 
+          // NAYA LOGIC: Active aur Pending dono check karega
           const activeModifyConsent = consentsData.find(
-            (c: any) => c.doctor_id === dbDoctor.id && c.status === 'ACTIVE' && c.access_type === 'View & Modify'
+            (c: any) => c.doctor_id === dbDoctor.id && c.status === 'ACTIVE' && c.access_type.includes('Modify')
           );
+          
+          const pendingModifyConsent = consentsData.find(
+            (c: any) => c.doctor_id === dbDoctor.id && c.status === 'PENDING' && c.access_type.includes('Modify')
+          );
+
           setHasModifyAccess(!!activeModifyConsent);
+          setIsPendingAccess(!!pendingModifyConsent);
         }
       } catch (error) {
         console.error(error);
@@ -90,7 +98,6 @@ export const PatientDetail = () => {
       formData.append('provider_name', doctorName);
       formData.append('date', new Date().toISOString().split('T')[0]);
       
-      // Agar file select ki hai, tabhi attach karo
       if (selectedFile) {
         formData.append('file', selectedFile);
       }
@@ -118,7 +125,7 @@ export const PatientDetail = () => {
       setSavingNote(false);
     }
   };
-  
+
   if (loading) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[50vh] text-primary">
@@ -144,9 +151,15 @@ export const PatientDetail = () => {
               <span>•</span>
               <span>{patient?.gender || 'Unknown'}, {patient?.dob || 'DOB Not provided'}</span>
               <span>•</span>
+              
+              {/* NAYA: Dynamic Badges based on access state */}
               {hasModifyAccess ? (
                  <span className="flex items-center gap-1 text-green-700 bg-green-50 px-2 py-0.5 rounded border border-green-200 font-medium">
                    <ShieldCheck className="h-3.5 w-3.5" /> Modify Access Active
+                 </span>
+              ) : isPendingAccess ? (
+                 <span className="flex items-center gap-1 text-orange-700 bg-orange-50 px-2 py-0.5 rounded border border-orange-200 font-medium">
+                   <Clock className="h-3.5 w-3.5" /> Request Pending
                  </span>
               ) : (
                  <span className="flex items-center gap-1 text-blue-700 bg-blue-50 px-2 py-0.5 rounded border border-blue-200 font-medium">
@@ -169,10 +182,15 @@ export const PatientDetail = () => {
         )}
       </div>
 
+      {/* NAYA: Dynamic Warning Banner */}
       {!hasModifyAccess && (
-        <div className="bg-blue-50 border border-blue-200 rounded-xl p-4 flex gap-3 text-blue-800 text-sm">
-          <Eye className="h-5 w-5 text-blue-600 shrink-0" />
-          <p>You are viewing this record in <strong>Read-Only</strong> mode. You can browse the medical history, but to add new prescriptions or update records, patient authorization is required.</p>
+        <div className={`border rounded-xl p-4 flex gap-3 text-sm ${isPendingAccess ? 'bg-orange-50 border-orange-200 text-orange-800' : 'bg-blue-50 border-blue-200 text-blue-800'}`}>
+          {isPendingAccess ? <Clock className="h-5 w-5 text-orange-600 shrink-0 mt-0.5" /> : <Eye className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />}
+          <p>
+            {isPendingAccess 
+              ? "Your request for Modify Access is currently Pending. Once the patient approves it from their portal, you will be able to upload new records."
+              : "You are viewing this record in Read-Only mode. You can browse the medical history, but to add new prescriptions or update records, patient authorization is required."}
+          </p>
         </div>
       )}
 
@@ -205,9 +223,17 @@ export const PatientDetail = () => {
                         {new Date(event.date).toLocaleDateString()}
                       </div>
                     </div>
-                    <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex flex-wrap items-center gap-3 w-full">
                       <span className="text-sm font-medium text-slate-700">{event.provider_name}</span>
                       <StatusBadge status="PROVIDER_VERIFIED" />
+                      
+                      {event.file_url && (
+                        <a href={event.file_url} target="_blank" rel="noopener noreferrer" className="ml-auto">
+                          <Button variant="outline" size="sm" className="h-8 gap-1.5 text-primary border-primary/20 hover:bg-primary/5">
+                            <Eye className="w-3.5 h-3.5" /> View Document
+                          </Button>
+                        </a>
+                      )}
                     </div>
                   </div>
                 </div>
@@ -217,7 +243,6 @@ export const PatientDetail = () => {
         )}
       </div>
 
-      {/* NAYA: Add Record / Prescription Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
@@ -228,7 +253,6 @@ export const PatientDetail = () => {
             </div>
             
             <form onSubmit={handleAddNote} className="p-6 space-y-5">
-              
               <div className="space-y-2">
                 <label className="text-sm font-medium text-slate-700">Record Type</label>
                 <div className="grid grid-cols-2 gap-3">
@@ -254,7 +278,6 @@ export const PatientDetail = () => {
                 />
               </div>
 
-              {/* Real File Upload UI ONLY if it's a prescription */}
               {recordType === 'Prescription' && (
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-slate-700">Upload Digital Prescription</label>
@@ -295,7 +318,6 @@ export const PatientDetail = () => {
           </div>
         </div>
       )}
-
     </div>
   );
 };

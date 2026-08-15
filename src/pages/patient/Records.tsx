@@ -16,8 +16,6 @@ export const PatientRecords = () => {
   const [title, setTitle] = useState('');
   const [category, setCategory] = useState('Lab Result');
   const [date, setDate] = useState(new Date().toISOString().split('T')[0]);
-  
-  // NAYA STATE: File store karne ke liye
   const [selectedFile, setSelectedFile] = useState<File | null>(null);
 
   useEffect(() => {
@@ -45,14 +43,13 @@ export const PatientRecords = () => {
     fetchRecords();
   }, []);
 
-  // NAYA FUNCTION: Jab user file select karega
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     if (e.target.files && e.target.files[0]) {
       setSelectedFile(e.target.files[0]);
     }
   };
 
-const handleUpload = async (e: React.FormEvent) => {
+  const handleUpload = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!patientId) return;
     
@@ -63,18 +60,16 @@ const handleUpload = async (e: React.FormEvent) => {
     
     setUploading(true);
     try {
-      // NAYA: JSON ki jagah FormData use kar rahe hain file bhejne ke liye
       const formData = new FormData();
       formData.append('patient_id', patientId.toString());
       formData.append('title', title);
       formData.append('category', category);
       formData.append('provider_name', 'Self-Uploaded');
       formData.append('date', date);
-      formData.append('file', selectedFile); // Yahan file attach ho gayi
+      formData.append('file', selectedFile);
 
       const res = await fetch(`http://127.0.0.1:8000/records/`, {
         method: 'POST',
-        // DHYAAN DO: 'Content-Type' header hata diya hai (browser khud set karta hai)
         body: formData
       });
 
@@ -141,7 +136,13 @@ const handleUpload = async (e: React.FormEvent) => {
                 
                 <div className="flex items-center gap-4 w-full sm:w-auto">
                   <StatusBadge status={record.provider_name === 'Self-Uploaded' ? 'PATIENT_UPLOADED' : 'PROVIDER_VERIFIED'} />
-                  <Button variant="ghost" size="sm" className="text-primary">View File</Button>
+                  {record.file_url ? (
+                    <a href={record.file_url} target="_blank" rel="noopener noreferrer">
+                      <Button variant="ghost" size="sm" className="text-primary hover:bg-primary/10">View File</Button>
+                    </a>
+                  ) : (
+                    <span className="text-xs text-slate-400 italic px-3">No Attachment</span>
+                  )}
                 </div>
               </div>
             ))}
@@ -149,7 +150,6 @@ const handleUpload = async (e: React.FormEvent) => {
         )}
       </div>
 
-      {/* Patient Upload Modal */}
       {showModal && (
         <div className="fixed inset-0 bg-slate-900/40 backdrop-blur-sm z-50 flex items-center justify-center p-4">
           <div className="bg-white rounded-2xl shadow-xl w-full max-w-md overflow-hidden animate-in zoom-in-95 duration-200">
@@ -179,16 +179,13 @@ const handleUpload = async (e: React.FormEvent) => {
                 </div>
               </div>
 
-              {/* FIX: Asli File Upload UI */}
               <label className={`border-2 border-dashed rounded-xl p-6 flex flex-col items-center justify-center cursor-pointer transition-colors ${selectedFile ? 'border-green-400 bg-green-50 hover:bg-green-100' : 'border-primary/30 bg-primary/5 hover:bg-primary/10'}`}>
-                {/* Hidden input field */}
                 <input 
                   type="file" 
                   className="hidden" 
                   accept=".pdf,.jpg,.jpeg,.png"
                   onChange={handleFileChange}
                 />
-                
                 {selectedFile ? (
                   <>
                     <CheckCircle className="w-8 h-8 text-green-500 mx-auto mb-2" />
