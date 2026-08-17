@@ -3,13 +3,13 @@ from sqlalchemy import create_engine
 from sqlalchemy.orm import sessionmaker, declarative_base
 from dotenv import load_dotenv
 
-# .env file load karo
+# Load .env file
 load_dotenv()
 
-# .env se DATABASE_URL fetch karo
+# Fetch DATABASE_URL from .env
 SQLALCHEMY_DATABASE_URL = os.getenv("DATABASE_URL", "sqlite:///./sql_app.db")
 
-# Engine create karo jo database se connection handle karega
+# Create engine to handle database connections
 if SQLALCHEMY_DATABASE_URL.startswith("sqlite"):
     engine = create_engine(
         SQLALCHEMY_DATABASE_URL, connect_args={"check_same_thread": False}
@@ -21,7 +21,7 @@ SessionLocal = sessionmaker(autocommit=False, autoflush=False, bind=engine)
 
 Base = declarative_base()
 
-# Dependency generator function (Har API request ke liye DB session dega)
+# Dependency generator function (provides DB session for each API request)
 def get_db():
     db = SessionLocal()
     try:

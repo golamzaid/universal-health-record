@@ -8,7 +8,7 @@ import jsPDF from 'jspdf';
 export const PatientEmergency = () => {
   const profileRef = useRef<HTMLDivElement>(null);
   
-  // NAYA: Professional Structured Medical Data Format
+  // Professional Structured Medical Data Format
   const generateEmergencyData = () => {
     return `====================================
  🏥 UPHAR DIGITAL MEDICAL ALERT 🏥
@@ -29,7 +29,7 @@ GENDER      : Male
 • Asthma
 ------------------------------------
 [ EMERGENCY CONTACT ]
-NAME  : Sarah Zaid (Wife)
+NAME  : XXXXXX (Wife)
 PHONE : +91 98765-43210
 ------------------------------------
 * CONFIDENTIAL MEDICAL DATA *
@@ -199,7 +199,7 @@ Authorized by Universal Health Record
                 </div>
                 <div>
                   <p className="text-xs font-bold uppercase tracking-wider text-slate-500 mb-1">Emergency Contact (Wife)</p>
-                  <p className="font-bold text-slate-900 text-lg">Sarah Zaid • +91 98765 43210</p>
+                  <p className="font-bold text-slate-900 text-lg">XXXXXX • +91 98765 43210</p>
                 </div>
               </div>
             </div>

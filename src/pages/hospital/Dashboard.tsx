@@ -7,7 +7,7 @@ import { supabase } from '@/supabaseClient';
 export const HospitalDashboard = () => {
   const [hospitalName, setHospitalName] = useState('');
   const [patientCount, setPatientCount] = useState(0);
-  const [isFetching, setIsFetching] = useState(true); // Naya loading state
+  const [isFetching, setIsFetching] = useState(true); // New loading state
 
   useEffect(() => {
     const fetchData = async () => {
@@ -30,14 +30,14 @@ export const HospitalDashboard = () => {
       } catch (err) {
         console.error("Could not fetch dashboard data", err);
       } finally {
-        // Data aane ke baad loading band kar do
+        // Loading stop when data is fetched or if there's an error
         setIsFetching(false);
       }
     };
     fetchData();
   }, []);
 
-  // Jab tak data aa raha hai, ek mast sa loading spinner dikhao
+
   if (isFetching) {
     return (
       <div className="flex flex-col items-center justify-center min-h-[60vh] text-primary">

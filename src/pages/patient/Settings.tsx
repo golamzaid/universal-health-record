@@ -89,7 +89,7 @@ export const PatientSettings = () => {
 
       <form onSubmit={handleSave} className="space-y-6">
         
-        {/* Profile Photo Section (UI Only for now) */}
+        {/* Profile Photo Section */}
         <div className="bg-white p-6 border rounded-xl shadow-sm flex items-center gap-6">
           <div className="h-24 w-24 rounded-full bg-slate-100 border-2 border-dashed border-slate-300 flex items-center justify-center relative overflow-hidden group cursor-pointer hover:bg-slate-50">
             <Camera className="h-8 w-8 text-slate-400 group-hover:text-primary transition-colors" />

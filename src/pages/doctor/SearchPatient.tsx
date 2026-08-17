@@ -67,7 +67,7 @@ export const SearchPatient = () => {
         doctor_id: doctorData.id,
         doctor_name: doctorData.name,
         hospital_name: doctorData.specialization || 'Independent Clinic',
-        access_type: 'View & Modify', // Ab sirf Modify Access jayega
+        access_type: 'View & Modify',
         duration: duration
       };
 

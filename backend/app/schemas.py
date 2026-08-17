@@ -13,7 +13,7 @@ class UserCreate(BaseModel):
     specialization: Optional[str] = None
     address: Optional[str] = None
 
-# Settings Page se update karne ke liye Naya Schema
+# New schema for updating from Settings page
 class UserUpdate(BaseModel):
     profile_photo: Optional[str] = None
     father_name: Optional[str] = None
@@ -34,7 +34,7 @@ class UserResponse(BaseModel):
     specialization: Optional[str] = None
     address: Optional[str] = None
     
-    # Naye Fields Response mein bhi bhejo
+    # Include new fields in response as well
     uphar_id: Optional[str] = None
     profile_photo: Optional[str] = None
     father_name: Optional[str] = None
@@ -46,7 +46,7 @@ class UserResponse(BaseModel):
     class Config:
         from_attributes = True
 
-# RecordCreate aur RecordResponse same rahenge...
+# RecordCreate and RecordResponse remain the same...
 class RecordCreate(BaseModel):
     patient_id: int
     title: str
@@ -60,11 +60,11 @@ class RecordResponse(BaseModel):
     provider_name: str
     category: str
     date: datetime
-    file_url: Optional[str] = None # <-- YEH NAYI LINE HAI
+    file_url: Optional[str] = None 
     class Config:
         from_attributes = True
         
-# --- Consent Schemas (NEW) ---
+# --- Consent Schemas  ---
 class ConsentCreate(BaseModel):
     patient_id: int
     doctor_id: int
@@ -74,7 +74,7 @@ class ConsentCreate(BaseModel):
     duration: str
 
 class ConsentUpdate(BaseModel):
-    status: str  # APPROVE, REJECT, REVOKE karne ke liye
+    status: str  # For APPROVE, REJECT, REVOKE actions
 
 class ConsentResponse(BaseModel):
     id: int

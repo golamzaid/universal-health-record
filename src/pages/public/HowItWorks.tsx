@@ -126,7 +126,6 @@ export const HowItWorks = () => {
   );
 };
 
-// Ek chhota sa component reusable cards ke liye
 const StepCard = ({ number, icon: Icon, title, desc }: any) => (
   <div className="bg-white p-8 rounded-2xl border border-slate-100 shadow-sm hover:shadow-md transition-shadow relative overflow-hidden group">
     <div className="text-6xl font-black text-slate-50 absolute -right-4 -top-6 group-hover:scale-110 transition-transform duration-300 pointer-events-none select-none">

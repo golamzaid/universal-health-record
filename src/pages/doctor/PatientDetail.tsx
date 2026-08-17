@@ -12,7 +12,7 @@ export const PatientDetail = () => {
   const [patient, setPatient] = useState<any>(null);
   const [records, setRecords] = useState<any[]>([]);
   const [hasModifyAccess, setHasModifyAccess] = useState(false);
-  const [isPendingAccess, setIsPendingAccess] = useState(false); // NAYA: Pending state ke liye
+  const [isPendingAccess, setIsPendingAccess] = useState(false); // For Pending state 
   const [loading, setLoading] = useState(true);
   const [doctorName, setDoctorName] = useState('');
 
@@ -44,7 +44,7 @@ export const PatientDetail = () => {
           const consentsRes = await fetch(`http://127.0.0.1:8000/users/${dbPatient.id}/consents`);
           const consentsData = await consentsRes.json();
 
-          // NAYA LOGIC: Active aur Pending dono check karega
+          // Active and Pending check 
           const activeModifyConsent = consentsData.find(
             (c: any) => c.doctor_id === dbDoctor.id && c.status === 'ACTIVE' && c.access_type.includes('Modify')
           );
@@ -152,7 +152,7 @@ export const PatientDetail = () => {
               <span>{patient?.gender || 'Unknown'}, {patient?.dob || 'DOB Not provided'}</span>
               <span>•</span>
               
-              {/* NAYA: Dynamic Badges based on access state */}
+              {/* Dynamic Badges based on access state */}
               {hasModifyAccess ? (
                  <span className="flex items-center gap-1 text-green-700 bg-green-50 px-2 py-0.5 rounded border border-green-200 font-medium">
                    <ShieldCheck className="h-3.5 w-3.5" /> Modify Access Active
@@ -170,7 +170,7 @@ export const PatientDetail = () => {
           </div>
         </div>
         
-        {/* Modify Action Button */}
+        
         {hasModifyAccess ? (
           <Button onClick={() => setShowModal(true)} className="gap-2 shadow-sm shrink-0">
             <Plus className="h-4 w-4" /> Add Record
@@ -182,7 +182,7 @@ export const PatientDetail = () => {
         )}
       </div>
 
-      {/* NAYA: Dynamic Warning Banner */}
+      {/* Dynamic Warning Banner */}
       {!hasModifyAccess && (
         <div className={`border rounded-xl p-4 flex gap-3 text-sm ${isPendingAccess ? 'bg-orange-50 border-orange-200 text-orange-800' : 'bg-blue-50 border-blue-200 text-blue-800'}`}>
           {isPendingAccess ? <Clock className="h-5 w-5 text-orange-600 shrink-0 mt-0.5" /> : <Eye className="h-5 w-5 text-blue-600 shrink-0 mt-0.5" />}

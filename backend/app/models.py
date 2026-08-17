@@ -18,7 +18,7 @@ class User(Base):
     specialization = Column(String, nullable=True)
     address = Column(String, nullable=True)
 
-    # === NAYE FIELDS YAHAN HAIN ===
+    # === NEW FIELDS ARE HERE ===
     uphar_id = Column(String, unique=True, index=True, nullable=True) # Unique ID
     profile_photo = Column(String, nullable=True)
     father_name = Column(String, nullable=True)
@@ -30,7 +30,7 @@ class User(Base):
 
     records = relationship("MedicalRecord", back_populates="patient")
 
-# MedicalRecord class waise hi rahegi...
+# MedicalRecord class remains the same...
 class MedicalRecord(Base):
     __tablename__ = "medical_records"
     id = Column(Integer, primary_key=True, index=True)
@@ -39,7 +39,7 @@ class MedicalRecord(Base):
     provider_name = Column(String)
     category = Column(String)
     date = Column(DateTime, default=datetime.datetime.utcnow)
-    file_url = Column(String, nullable=True) # <-- YEH NAYI LINE HAI
+    file_url = Column(String, nullable=True)
     patient = relationship("User", back_populates="records")
     
     # 3. Consents Table
@@ -50,7 +50,7 @@ class Consent(Base):
     patient_id = Column(Integer, ForeignKey("users.id"))
     doctor_id = Column(Integer, ForeignKey("users.id"))
     
-    # UI mein dikhane ke liye extra info
+    # Extra info to display in the UI
     doctor_name = Column(String)
     hospital_name = Column(String) 
     

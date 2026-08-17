@@ -31,6 +31,7 @@ export const LoginPage = () => {
   
   const navigate = useNavigate();
 
+  // Reset role-specific fields when role or sign-up mode changes
   useEffect(() => {
     setName(''); setPhone(''); setDob(''); setGender(''); 
     setLicense(''); setSpecialization(''); setAddress('');
@@ -41,6 +42,7 @@ export const LoginPage = () => {
     setLoading(true);
     setMessage('');
 
+    // Handle sign-up flow
     if (isSignUp) {
       const { data, error } = await supabase.auth.signUp({
         email: email,
@@ -83,6 +85,7 @@ export const LoginPage = () => {
         }
       }
     } else {
+      // Handle sign-in flow
       const { data, error } = await supabase.auth.signInWithPassword({
         email: email,
         password: password,
@@ -102,11 +105,12 @@ export const LoginPage = () => {
     <div className="min-h-screen flex items-center justify-center bg-slate-50 p-4">
       <div className="w-full max-w-lg bg-white rounded-xl shadow-sm border p-8 space-y-6 transition-all duration-300 relative">
         
-        {/* === BACK TO HOME BUTTON === */}
+        {/* Navigation link back to home page */}
         <Link to="/" className="absolute top-6 left-6 text-slate-400 hover:text-primary flex items-center gap-1.5 text-sm font-medium transition-colors">
           <ArrowLeft className="w-4 h-4" /> Home
         </Link>
 
+        {/* Page title and branding section */}
         <div className="text-center space-y-2 pt-4">
           <div className="inline-flex items-center gap-2 text-primary font-bold text-2xl mb-2">
             <Activity className="h-8 w-8" />
@@ -120,7 +124,7 @@ export const LoginPage = () => {
           </p>
         </div>
 
-        {/* Role Selector */}
+        {/* Role selection tabs for user type */}
         <div className="flex p-1 bg-slate-100 rounded-lg">
           {(['patient', 'doctor', 'hospital'] as Role[]).map((r) => (
             <button
@@ -142,6 +146,7 @@ export const LoginPage = () => {
         <form onSubmit={handleAuth} className="space-y-4">
           {isSignUp && (
             <div className="space-y-4 animate-in fade-in slide-in-from-top-2 duration-300">
+              {/* Common fields for all user types: name and contact */}
               <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
                 <div className="space-y-2">
                   <label className="text-sm font-medium text-slate-700">
@@ -168,6 +173,7 @@ export const LoginPage = () => {
                 </div>
               </div>
 
+              {/* Patient-specific fields: date of birth and gender */}
               {role === 'patient' && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -186,6 +192,7 @@ export const LoginPage = () => {
                 </div>
               )}
 
+              {/* Doctor-specific fields: medical license and specialization */}
               {role === 'doctor' && (
                 <div className="grid grid-cols-2 gap-4">
                   <div className="space-y-2">
@@ -205,6 +212,7 @@ export const LoginPage = () => {
                 </div>
               )}
 
+              {/* Hospital-specific fields: registration number and address */}
               {role === 'hospital' && (
                 <div className="space-y-4">
                   <div className="space-y-2">
@@ -220,6 +228,7 @@ export const LoginPage = () => {
             </div>
           )}
 
+          {/* Email and password fields - required for both sign-up and sign-in */}
           <div className="space-y-2">
             <label className="text-sm font-medium text-slate-700">
               {role === 'hospital' ? 'Admin Email address' : 'Email address'}
@@ -247,17 +256,20 @@ export const LoginPage = () => {
             />
           </div>
           
+          {/* Status message display for success or error feedback */}
           {message && (
             <div className={`text-sm p-3 rounded-lg border ${message.includes('Error') ? 'bg-red-50 text-red-600 border-red-200' : 'bg-green-50 text-green-700 border-green-200'}`}>
               {message}
             </div>
           )}
 
+          {/* Submit button for authentication action */}
           <Button type="submit" className="w-full h-11 text-base font-semibold" disabled={loading}>
             {loading ? 'Processing...' : (isSignUp ? `Register as ${role.charAt(0).toUpperCase() + role.slice(1)}` : `Sign In`)}
           </Button>
         </form>
 
+        {/* Toggle between sign-up and sign-in modes */}
         <div className="text-center text-sm text-slate-500 pt-2 border-t">
           {isSignUp ? "Already have an account? " : "Don't have an account? "}
           <button 
