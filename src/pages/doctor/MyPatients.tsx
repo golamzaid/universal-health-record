@@ -24,14 +24,14 @@ export const MyPatients = () => {
         if (!user) return;
 
         // Fetch all users to find the current doctor
-        const usersRes = await fetch('http://127.0.0.1:8000/users/');
+          const usersRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/users/`);
         const allUsers = await usersRes.json();
         
         const dbDoctor = allUsers.find((u: any) => u.email === user.email);
         
         if (dbDoctor) {
           // 2. Fetch consents specifically for this doctor
-          const consentsRes = await fetch(`http://127.0.0.1:8000/doctors/${dbDoctor.id}/consents`);
+            const consentsRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/doctors/${dbDoctor.id}/consents`);
           const doctorConsents = await consentsRes.json();
 
           // 3. Get unique patient IDs who have interacted with this doctor

@@ -30,15 +30,15 @@ export const PatientActivity = () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        const usersRes = await fetch('http://127.0.0.1:8000/users/');
+        const usersRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/users/`);
         const users = await usersRes.json();
         const dbUser = users.find((u: any) => u.email === user.email);
 
         if (dbUser) {
           // 2. Fetch both Medical Records and Consents concurrently for maximum performance
           const [recordsRes, consentsRes] = await Promise.all([
-            fetch(`http://127.0.0.1:8000/users/${dbUser.id}/records`),
-            fetch(`http://127.0.0.1:8000/users/${dbUser.id}/consents`)
+            fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/users/${dbUser.id}/records`),
+            fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/users/${dbUser.id}/consents`)
           ]);
 
           const recordsData = await recordsRes.json();

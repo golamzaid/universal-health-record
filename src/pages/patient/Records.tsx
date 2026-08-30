@@ -24,13 +24,13 @@ export const PatientRecords = () => {
         const { data: { user } } = await supabase.auth.getUser();
         if (!user) return;
 
-        const usersRes = await fetch('http://127.0.0.1:8000/users/');
+        const usersRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/users/`);
         const users = await usersRes.json();
         const dbUser = users.find((u: any) => u.email === user.email);
 
         if (dbUser) {
           setPatientId(dbUser.id);
-          const recordsRes = await fetch(`http://127.0.0.1:8000/users/${dbUser.id}/records`);
+          const recordsRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/users/${dbUser.id}/records`);
           const recordsData = await recordsRes.json();
           setRecords(recordsData.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()));
         }
@@ -68,7 +68,7 @@ export const PatientRecords = () => {
       formData.append('date', date);
       formData.append('file', selectedFile);
 
-      const res = await fetch(`http://127.0.0.1:8000/records/`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/records/`, {
         method: 'POST',
         body: formData
       });

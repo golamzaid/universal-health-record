@@ -11,7 +11,7 @@ export const PatientDirectory = () => {
 
   useEffect(() => {
     // Fetch all users and filter only patients
-    fetch('http://127.0.0.1:8000/users/')
+    fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/users/`)
       .then(res => res.json())
       .then(data => {
         setPatients(data.filter((u: any) => u.role === 'patient'));

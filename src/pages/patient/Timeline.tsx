@@ -26,12 +26,12 @@ export const PatientTimeline = () => {
           return;
         }
 
-        const usersResponse = await fetch('http://127.0.0.1:8000/users/');
+        const usersResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/users/`);
         const users = await usersResponse.json();
         const dbUser = users.find((u: any) => u.email === user.email);
 
         if (dbUser) {
-          const recordsResponse = await fetch(`http://127.0.0.1:8000/users/${dbUser.id}/records`);
+          const recordsResponse = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/users/${dbUser.id}/records`);
           const recordsData = await recordsResponse.json();
           
           const sortedRecords = recordsData.sort((a: any, b: any) => 

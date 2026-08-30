@@ -22,7 +22,7 @@ export const PatientSettings = () => {
     const fetchUserData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const res = await fetch('http://127.0.0.1:8000/users/');
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/users/`);
         const users = await res.json();
         const dbUser = users.find((u: any) => u.email === user.email);
         
@@ -55,7 +55,7 @@ export const PatientSettings = () => {
         insurance_policy: policy
       };
 
-      const response = await fetch(`http://127.0.0.1:8000/users/${userId}/settings`, {
+      const response = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/users/${userId}/settings`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

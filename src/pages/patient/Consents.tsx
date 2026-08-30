@@ -17,12 +17,12 @@ export const PatientConsents = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         try {
-          const resUsers = await fetch('http://127.0.0.1:8000/users/');
+          const resUsers = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/users/`);
           const users = await resUsers.json();
           const dbUser = users.find((u: any) => u.email === user.email);
           
           if (dbUser) {
-            const resConsents = await fetch(`http://127.0.0.1:8000/users/${dbUser.id}/consents`);
+            const resConsents = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/users/${dbUser.id}/consents`);
             const data = await resConsents.json();
             
             // Sort by newest first
@@ -42,7 +42,7 @@ export const PatientConsents = () => {
   const handleAction = async (consentId: number, newStatus: string) => {
     setActionLoading(consentId);
     try {
-      const res = await fetch(`http://127.0.0.1:8000/consents/${consentId}`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/consents/${consentId}`, {
         method: 'PUT',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ status: newStatus })

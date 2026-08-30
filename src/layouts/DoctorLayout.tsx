@@ -17,7 +17,7 @@ export const DoctorLayout = () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
         try {
-          const res = await fetch('http://127.0.0.1:8000/users/');
+            const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/users/`);
           const users = await res.json();
           const dbUser = users.find((u: any) => u.email === user.email);
           

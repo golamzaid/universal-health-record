@@ -14,7 +14,7 @@ export const HospitalDashboard = () => {
       const { data: { user } } = await supabase.auth.getUser();
       try {
         // Fetch all users from backend
-        const res = await fetch('http://127.0.0.1:8000/users/');
+        const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/users/`);
         const users = await res.json();
         
         // 1. Set Hospital Name

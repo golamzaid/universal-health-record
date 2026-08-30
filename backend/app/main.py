@@ -30,7 +30,7 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:5173", 
-        # "https://your-production-vercel-domain.vercel.app" # Add your Vercel domain here later
+        "https://universal-health-record.vercel.app/"
     ], 
     allow_credentials=True,
     allow_methods=["*"],

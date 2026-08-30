@@ -20,7 +20,7 @@ export const SearchPatient = () => {
     const fetchDoctorData = async () => {
       const { data: { user } } = await supabase.auth.getUser();
       if (user) {
-        const res = await fetch('http://127.0.0.1:8000/users/');
+          const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/users/`);
         const users = await res.json();
         const dbUser = users.find((u: any) => u.email === user.email);
         if (dbUser) setDoctorData(dbUser);
@@ -40,7 +40,7 @@ export const SearchPatient = () => {
         searchId = `UPH-${searchId}`;
       }
 
-      const res = await fetch('http://127.0.0.1:8000/users/');
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/users/`);
       const users = await res.json();
       
       const patient = users.find((u: any) => u.uphar_id === searchId && u.role === 'patient');
@@ -71,7 +71,7 @@ export const SearchPatient = () => {
         duration: duration
       };
 
-      const res = await fetch('http://127.0.0.1:8000/consents/', {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/consents/`, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(payload)

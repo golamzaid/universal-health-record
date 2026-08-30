@@ -27,7 +27,7 @@ export const PatientDetail = () => {
     const fetchPatientAndRecords = async () => {
       try {
         const { data: { user } } = await supabase.auth.getUser();
-        const usersRes = await fetch('http://127.0.0.1:8000/users/');
+        const usersRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/users/`);
         const users = await usersRes.json();
 
         const dbDoctor = users.find((u: any) => u.email === user?.email);
@@ -37,12 +37,12 @@ export const PatientDetail = () => {
         if (dbPatient) setPatient(dbPatient);
 
         if (dbPatient && dbDoctor) {
-          const recordsRes = await fetch(`http://127.0.0.1:8000/users/${dbPatient.id}/records`);
+            const recordsRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/users/${dbPatient.id}/records`);
           const recordsData = await recordsRes.json();
           setRecords(recordsData.sort((a: any, b: any) => new Date(b.date).getTime() - new Date(a.date).getTime()));
 
-          const consentsRes = await fetch(`http://127.0.0.1:8000/users/${dbPatient.id}/consents`);
-          const consentsData = await consentsRes.json();
+          const consentsRes = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/users/${dbPatient.id}/consents`);
+            const consentsData = await consentsRes.json();
 
           // Active and Pending check 
           const activeModifyConsent = consentsData.find(
@@ -102,7 +102,7 @@ export const PatientDetail = () => {
         formData.append('file', selectedFile);
       }
 
-      const res = await fetch(`http://127.0.0.1:8000/records/`, {
+      const res = await fetch(`${import.meta.env.VITE_API_URL || 'http://127.0.0.1:8000'}/records/`, {
         method: 'POST',
         body: formData
       });
